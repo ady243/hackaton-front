@@ -61,7 +61,7 @@ export interface User {
   export interface SessionCourse {
     id: number;
     classrooms_id: number;
-    stuts: 'PENDING' | 'CANCELLED' | 'CONFIRMED';
+    statuts: 'PENDING' | 'REFUSED' | 'CONFIRMED';
     assignments_courses_id: number;
     comment: string;
     start_at: Date;

@@ -9,12 +9,7 @@ export default function Register() {
 
   const fields = [
     { name: 'name', label: 'Nom d\'utilisateur', type: 'text', required: true },
-    { name: 'email', label: 'Email', type: 'email', required: true },
-    {name :'role', label: 'Role', type: 'select', options: [{
-      value: 'admin',
-       label: 'Administateur'
-      }, 
-      {value: 'professor', label: 'Pofesseur'}] },
+    { name: 'email', label: 'Email', type: 'email', required: true }, 
     { name: 'password', label: 'Mot de passe', type: 'password', required: true }
   ];
  

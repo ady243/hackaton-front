@@ -1,10 +1,15 @@
 "use client";
 
 
-import { FormBuilderProps } from '@/interfaces/formBuilder';
 import React, { useState } from 'react';
 
-function FormBuilder({ fields, apiEndpoint }: FormBuilderProps) {
+interface FormBuilderProps {
+  fields: { name: string; label: string; type: string; options?: { value: string; label: string }[] }[];
+  apiEndpoint: string;
+  buttonText?: string;
+}
+
+function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuilderProps) {
   const [formData, setFormData] = useState(
     fields.reduce((acc, field) => {
       acc[field.name] = '';
@@ -86,7 +91,7 @@ function FormBuilder({ fields, apiEndpoint }: FormBuilderProps) {
         </div>
       ))}
       <button type="submit" className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-        Soumettre
+        {buttonText}
       </button>
     </form>
   );
