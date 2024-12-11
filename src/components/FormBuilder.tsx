@@ -1,6 +1,6 @@
 "use client";
 
-import { FormBuilderProps } from '@/types/formBuilder';
+import { FormBuilderProps } from '@/interfaces/formBuilder';
 import React, { useState } from 'react';
 
 function FormBuilder({ fields, apiEndpoint }: FormBuilderProps) {

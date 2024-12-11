@@ -5,15 +5,14 @@ import { FaBuromobelexperte } from "react-icons/fa";
 
 function Sidebar() {
   const router = useRouter();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const excludedPaths = ['/login', '/register'];
   const defaultPath = '/calendar';
 
   useEffect(() => {
-    if (!excludedPaths.includes(router.pathname) && router.pathname !== defaultPath) {
+    if (!excludedPaths.includes(router.pathname) && router.pathname === '/') {
       router.push(defaultPath);
     }
-  }, [excludedPaths, router, router.pathname]);
+  }, [router.pathname]);
 
   if (excludedPaths.includes(router.pathname)) {
     return null;
@@ -21,7 +20,7 @@ function Sidebar() {
 
   return (
     <div>
-      <div className="fixed flex flex-col top-0 left-0 w-64 bg-white h-full border-r">
+      <div className="fixed flex flex-col top-0 left-0 w-64 bg-blue-100 h-full border-r">
         <div className="flex items-center justify-center h-14 border-b">
           <div>hackathon</div>
         </div>
@@ -56,14 +55,14 @@ function Sidebar() {
               </a>
             </li>
             <li>
-              <a href="#" className="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+              <a href="/dataTable" className="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                 <span className="inline-flex justify-center items-center ml-4">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                   </svg>
                 </span>
                 <span className="ml-2 text-sm tracking-wide truncate">Professeurs</span>
-                <span className="px-2 py-0.5 ml-auto text-xs font-medium tracking-wide text-green-500 bg-green-50 rounded-full">hjdhddb</span>
+                {/* <span className="px-2 py-0.5 ml-auto text-xs font-medium tracking-wide text-green-500 bg-green-50 rounded-full">hjdhddb</span> */}
               </a>
             </li>
             <li>
