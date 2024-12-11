@@ -8,8 +8,8 @@ import frLocale from '@fullcalendar/core/locales/fr';
 
 export default function Calendar() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-6xl p-4 bg-white rounded shadow-md">
+    <div className="flex items-center justify-end min-h-screen">
+      <div className="w-full max-w-6xl p-4 bg-white rounded">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek" 
