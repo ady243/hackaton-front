@@ -5,6 +5,7 @@ import { FaBuromobelexperte } from "react-icons/fa";
 
 function Sidebar() {
   const router = useRouter();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const excludedPaths = ['/login', '/register'];
   const defaultPath = '/calendar';
 
@@ -12,7 +13,7 @@ function Sidebar() {
     if (!excludedPaths.includes(router.pathname) && router.pathname !== defaultPath) {
       router.push(defaultPath);
     }
-  }, [router.pathname]);
+  }, [excludedPaths, router, router.pathname]);
 
   if (excludedPaths.includes(router.pathname)) {
     return null;
