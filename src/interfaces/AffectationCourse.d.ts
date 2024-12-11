@@ -3,7 +3,7 @@ export interface AffectationCourse {
     day: string;
     start_at: Date;
     end_at: Date;
-    status: string; 
+    status: 'pending' | 'approved' | 'rejected'; 
     teachers_id: number;
     courses_id: number;
     groups_id: number;
