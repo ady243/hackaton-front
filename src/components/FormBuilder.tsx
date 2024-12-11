@@ -1,5 +1,6 @@
 "use client";
 
+
 import { FormBuilderProps } from '@/interfaces/formBuilder';
 import React, { useState } from 'react';
 
@@ -42,7 +43,7 @@ function FormBuilder({ fields, apiEndpoint }: FormBuilderProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {fields.map((field) => (
-        <div key={field.name}>
+        <div key={field.name} className="flex flex-col">
           <label htmlFor={field.name} className="block text-sm font-medium text-gray-700">
             {field.label}:
           </label>
