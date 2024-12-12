@@ -1,9 +1,19 @@
 import Sidebar from '@/components/Sidebar';
-import React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import React, { useEffect } from 'react';
 import { FaChalkboardTeacher } from 'react-icons/fa';
 import { MdEventNote, MdPerson, MdClass, MdLibraryBooks } from 'react-icons/md';
 
 function AccueilPage() {
+  const { currentUser } = useAuth();
+  const user = currentUser();
+
+  useEffect(() => {
+    if (user) {
+      console.log('Current user:', user);
+    }
+  }, [user]);
+  
   return (
     <div className="flex">
       <Sidebar />

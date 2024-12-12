@@ -1,21 +1,17 @@
 export interface User {
-    id: number;
-    subjects_id: number;
-    email: string;
-    password: string;
-    role: 'ADMIN' | 'TEACHER' ; 
-    firstname: string;
-    lastname: string;
-    last_login: Date;
-    created_at: Date;
-    updated_at: Date;
-  }
+  id: number;
+  subjects_id: number;
+  email: string;
+  password: string;
+  role: 'ADMIN' | 'TEACHER';
+  first_name: string; 
+  last_name: string;  
+  phone_number: string;
+  last_login: Date;
+  created_at: Date;
+  updated_at: Date;
+}
 
-  export interface PartialUser {
-    firstname: string;
-    email: string;
-    password: string;
-  }
   
   export interface Subject {
     id: number;
@@ -87,5 +83,28 @@ export interface User {
     start_at: Date;
     end_at: Date;
     is_recurring: boolean;
+  }
+  
+  export interface PartialUser {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+    phone_number: string;
+    role?: 'ADMIN' | 'TEACHER';
+  }
+
+  interface FormField {
+    name: keyof User | 'phone_number' | 'role';
+    label: string;
+    type: string;
+    required: boolean;
+    defaultValue?: string;
+  }
+
+
+  interface ProgressBarProps {
+    message: string;
+    type: 'success' | 'error';
   }
   

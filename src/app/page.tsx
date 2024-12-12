@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!token) {
-      router.push('/accueil');
+      router.push('/login');
     } else {
       router.push('/accueil');
     }

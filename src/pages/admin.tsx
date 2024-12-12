@@ -10,6 +10,11 @@ const createProfessorFields = [
     { name: 'email', label: 'Email', type: 'email' },
 ];
 
+const sendCsvFields = [
+    {name:'name', label: 'Nom du document', type: 'text'},
+    { name: 'csv', label: 'Fichier CSV', type: 'file' },
+];
+
 const createClassFields = [
     { name: 'className', label: 'Nom de la classe', type: 'text' },
     { name: 'capacity', label: 'Nombre de places', type: 'number' },
@@ -58,6 +63,10 @@ function AdminPage() {
     {
       name: 'Attribuer un cours au prof',
       content: <FormBuilder fields={assignCourseFields} apiEndpoint="https://api.planify.com/assign-course" buttonText="Attribuer un cours au prof" />,
+    },
+    {
+        name: 'Envoyer un fichier CSV',
+        content: <FormBuilder fields={sendCsvFields} apiEndpoint="https://api.planify.com/send-csv" buttonText="Envoyer le fichier" />,
     }
   ];
 
