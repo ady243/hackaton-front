@@ -6,10 +6,11 @@ interface FormBuilderProps {
   fields: { name: string; label: string; type: string; options?: { value: string; label: string }[]; required?: boolean }[];
   apiEndpoint?: string;
   buttonText?: string;
+  headers?: Record<string, string>;
   onSubmit?: (formData: Record<string, string>) => Promise<void>;
 }
 
-function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", onSubmit }: FormBuilderProps) {
+function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", headers, onSubmit }: FormBuilderProps) {
   const [formData, setFormData] = useState(
     fields.reduce((acc, field) => {
       acc[field.name] = '';
@@ -35,6 +36,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", onSubmit }
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(headers || {}),
           },
           body: JSON.stringify(formData),
         });
