@@ -1,48 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import GenericTable from '@/components/genericComponent/GenericTable';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { Subject } from '@/interfaces/interaces';
 import { ColumnDef } from '@tanstack/react-table';
-
-
-const data: Subject[] = [
-  {
-    id: 1,
-    name: 'Mathématiques',
-    hourly_volume: 40,
-    start_at: new Date('2024-01-01'),
-    end_at: new Date('2024-06-01'),
-  },
-  {
-    id: 2,
-    name: 'Physique',
-    hourly_volume: 35,
-    start_at: new Date('2024-01-01'),
-    end_at: new Date('2024-06-01'),
-  },
-  {
-    id: 3,
-    name: 'Chimie',
-    hourly_volume: 30,
-    start_at: new Date('2024-01-01'),
-    end_at: new Date('2024-06-01'),
-  },
-  {
-    id: 4,
-    name: 'Biologie',
-    hourly_volume: 25,
-    start_at: new Date('2024-01-01'),
-    end_at: new Date('2024-06-01'),
-  },
-  {
-    id: 5,
-    name: 'Informatique',
-    hourly_volume: 45,
-    start_at: new Date('2024-01-01'),
-    end_at: new Date('2024-06-01'),
-  },
-];
+import { useAuth } from '@/context/AuthContext';
+import baseUrl from '@/config/baseUrl';
 
 const columns: ColumnDef<Subject>[] = [
   {
@@ -80,20 +43,106 @@ const columns: ColumnDef<Subject>[] = [
   {
     accessorKey: "start_at",
     header: "Date de début",
-    cell: ({ row }) => <div>{(row.getValue("start_at") as Date).toLocaleDateString()}</div>,
+    cell: ({ row }) => <div>{new Date(row.getValue("start_at")).toLocaleDateString()}</div>,
   },
   {
     accessorKey: "end_at",
     header: "Date de fin",
-    cell: ({ row }) => <div>{(row.getValue("end_at") as Date).toLocaleDateString()}</div>,
+    cell: ({ row }) => <div>{new Date(row.getValue("end_at")).toLocaleDateString()}</div>,
   },
 ];
 
 function SubjectDataTable() {
+  const { currentUser } = useAuth();
+  const { user, token } = currentUser();
+  const [data, setData] = useState<Subject[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/subjects/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        } else {
+          console.error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`${baseUrl}/subjects/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        setData(data.filter(subject => subject.id !== id));
+      } else {
+        console.error('Failed to delete subject');
+      }
+    } catch (error) {
+      console.error('Error deleting subject:', error);
+    }
+  };
+
+  const handleEdit = async (id: number, updatedSubject: Partial<Subject>) => {
+    try {
+      const response = await fetch(`${baseUrl}/subjects/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedSubject),
+      });
+      if (response.ok) {
+        const updatedData = await response.json();
+        setData(data.map(subject => (subject.id === id ? updatedData : subject)));
+      } else {
+        console.error('Failed to update subject');
+      }
+    } catch (error) {
+      console.error('Error updating subject:', error);
+    }
+  };
+
   const actions = (row: Subject) => (
     <div className="flex space-x-2">
-      <Button  className = 'bg-green-500 text-white' variant="outline" size="sm">Modifier </Button>
-      <Button className = 'bg-red-400 text-white' variant="outline" size="sm"> Supprimer</Button>
+      {user?.role === 'ADMIN' && (
+        <>
+          <Button
+            className='bg-green-500 text-white'
+            variant="outline"
+            size="sm"
+            onClick={() => handleEdit(row.id, { name: 'Updated Name' })} 
+          >
+            Modifier
+          </Button>
+          <Button
+            className='bg-red-400 text-white'
+            variant="outline"
+            size="sm"
+            onClick={() => handleDelete(row.id)}
+          >
+            Supprimer
+          </Button>
+        </>
+      )}
     </div>
   );
 

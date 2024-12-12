@@ -10,7 +10,7 @@ function AdminPage() {
   const [showChat, setShowChat] = useState(false);
   const [yearsGroupOptions, setYearsGroupOptions] = useState([]);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  console.log("Token récupéré :", token);
+
 
   useEffect(() => {
     const fetchYearsGroups = async () => {
@@ -102,9 +102,6 @@ function AdminPage() {
           fields={createProfessorFields}
           apiEndpoint={`${baseUrl}/users/invitation/send`}
           buttonText="Envoyer l'invitation"
-          headers={{
-            Authorization: `Bearer ${token}`,
-          }}
         />
       ),
     },

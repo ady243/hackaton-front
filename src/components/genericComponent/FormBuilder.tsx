@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface FormBuilderProps {
-  fields: { name: string; label: string; type: string; options?: { value: string; label: string }[]; required?: boolean }[];
+  fields: { name: string; label: string; type: string; value?: string; options?: { value: string; label: string }[]; required?: boolean; disabled?: boolean }[];
   apiEndpoint?: string;
   buttonText?: string;
   headers?: Record<string, string>;
@@ -13,10 +13,19 @@ interface FormBuilderProps {
 function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", headers, onSubmit }: FormBuilderProps) {
   const [formData, setFormData] = useState(
     fields.reduce((acc, field) => {
-      acc[field.name] = '';
+      acc[field.name] = field.value || '';
       return acc;
     }, {} as Record<string, string>)
   );
+
+  useEffect(() => {
+    setFormData(
+      fields.reduce((acc, field) => {
+        acc[field.name] = field.value || '';
+        return acc;
+      }, {} as Record<string, string>)
+    );
+  }, [fields]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -65,6 +74,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", headers, o
               value={formData[field.name]}
               onChange={handleChange}
               required={field.required}
+              disabled={field.disabled}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Sélectionnez une option</option>
@@ -81,6 +91,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", headers, o
               value={formData[field.name]}
               onChange={handleChange}
               required={field.required}
+              disabled={field.disabled}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           ) : (
@@ -91,6 +102,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", headers, o
               value={formData[field.name]}
               onChange={handleChange}
               required={field.required}
+              disabled={field.disabled}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           )}

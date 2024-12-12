@@ -108,3 +108,11 @@ export interface User {
     type: 'success' | 'error';
   }
   
+
+  interface PopupProps {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  }
+  

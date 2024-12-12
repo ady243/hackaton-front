@@ -1,37 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import GenericTable from '@/components/genericComponent/GenericTable';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { ColumnDef } from '@tanstack/react-table';
 import { Class } from '@/interfaces/interaces';
-
-const data: Class[] = [
-  {
-    id: 1,
-    fields_id: 101,
-    name: 'Classe A',
-  },
-  {
-    id: 2,
-    fields_id: 102,
-    name: 'Classe B',
-  },
-  {
-    id: 3,
-    fields_id: 103,
-    name: 'Classe C',
-  },
-  {
-    id: 4,
-    fields_id: 104,
-    name: 'Classe D',
-  },
-  {
-    id: 5,
-    fields_id: 105,
-    name: 'Classe E',
-  },
-];
+import { useAuth } from '@/context/AuthContext';
+import baseUrl from '@/config/baseUrl';
+import Popup from '@/components/genericComponent/Popup';
 
 const columns: ColumnDef<Class>[] = [
   {
@@ -66,17 +41,148 @@ const columns: ColumnDef<Class>[] = [
     header: "ID du champ",
     cell: ({ row }) => <div>{row.getValue("fields_id")}</div>,
   },
+  {
+    accessorKey: "number_students",
+    header: "Nombre d'étudiants",
+    cell: ({ row }) => <div>{row.getValue("number_students")}</div>,
+  },
+  {
+    accessorKey: "years_group_id",
+    header: "ID du groupe d'années",
+    cell: ({ row }) => <div>{row.getValue("years_group_id")}</div>,
+  },
 ];
 
 function ClassPage() {
+  const { currentUser } = useAuth();
+  const { user, token } = currentUser();
+  const [data, setData] = useState<Class[]>([]);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/classes/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        } else {
+          console.error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`${baseUrl}/classes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        setData(data.filter(classItem => classItem.id !== id));
+      } else {
+        console.error('Failed to delete class');
+      }
+    } catch (error) {
+      console.error('Error deleting class:', error);
+    }
+  };
+
+  const handleEdit = async (id: number, updatedClass: Partial<Class>) => {
+    try {
+      const response = await fetch(`${baseUrl}/classes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedClass),
+      });
+      if (response.ok) {
+        const updatedData = await response.json();
+        setData(data.map(classItem => (classItem.id === id ? updatedData : classItem)));
+      } else {
+        console.error('Failed to update class');
+      }
+    } catch (error) {
+      console.error('Error updating class:', error);
+    }
+  };
+
   const actions = (row: Class) => (
     <div className="flex space-x-2">
-      <Button  className = 'bg-green-500 text-white' variant="outline" size="sm">Modifier</Button>
-      <Button  className = 'bg-red-400 text-white' variant="outline" size="sm">Supprimer</Button>
+      {user?.role === 'ADMIN' && (
+        <>
+          <Button
+            className='bg-green-500 text-white'
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedClass(row);
+              setShowEditPopup(true);
+            }}
+          >
+            Modifier
+          </Button>
+          <Button
+            className='bg-red-400 text-white'
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSelectedClass(row);
+              setShowDeletePopup(true);
+            }}
+          >
+            Supprimer
+          </Button>
+        </>
+      )}
     </div>
   );
 
-  return <GenericTable data={data} columns={columns} actions={actions} />;
+  return (
+    <div>
+      <GenericTable data={data} columns={columns} actions={actions} />
+      {showDeletePopup && selectedClass && (
+        <Popup
+          title="Confirmer la suppression"
+          message={`Êtes-vous sûr de vouloir supprimer la classe ${selectedClass.name} ?`}
+          onConfirm={() => {
+            handleDelete(selectedClass.id);
+            setShowDeletePopup(false);
+          }}
+          onCancel={() => setShowDeletePopup(false)}
+        />
+      )}
+      {showEditPopup && selectedClass && (
+        <Popup
+          title="Modifier la classe"
+          message={`Êtes-vous sûr de vouloir modifier la classe ${selectedClass.name} ?`}
+          onConfirm={() => {
+            handleEdit(selectedClass.id, { name: 'Updated Name' });
+            setShowEditPopup(false);
+          }}
+          onCancel={() => setShowEditPopup(false)}
+        />
+      )}
+    </div>
+  );
 }
 
 export default ClassPage;

@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 
 interface TabBarProps {
   tabs: { name: string; content: React.ReactNode }[];
+  position?: string; 
 }
 
-const TabBar: React.FC<TabBarProps> = ({ tabs }) => {
+const TabBar: React.FC<TabBarProps> = ({ tabs, position = 'left-20' }) => { // Définissez une valeur par défaut
   const [activeTab, setActiveTab] = useState(0);
 
   return (
     <div>
-      <div className="fixed top-24 left-92 bg-white ">
-        <div className="flex justify-center bord border-gray-200">
+      <div className={`fixed top-12 ${position} bg-white z-10`}> {/* Utilisez la propriété position */}
+        <div className="flex justify-center border-b border-gray-200">
           {tabs.map((tab, index) => (
             <button
               key={index}
@@ -26,7 +27,7 @@ const TabBar: React.FC<TabBarProps> = ({ tabs }) => {
           ))}
         </div>
       </div>
-      <div className="pt-16 p-4">
+      <div className={`pt-20 p-4 ${position}`}> {/* Utilisez la propriété position */}
         {tabs[activeTab].content}
       </div>
     </div>

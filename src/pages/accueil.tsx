@@ -11,8 +11,6 @@ function AccueilPage() {
 
   useEffect(() => {
     if (user) {
-      console.log('Current user:', user);
-      console.log('Token:', token);
       setRole(user.role);
     }
   }, [user, token]);
@@ -44,17 +42,6 @@ function AccueilPage() {
                 Gérer les informations des professeurs et des matières
               </li>
             </ul>
-            {user && (
-              <p className="text-lg text-gray-700 mb-4">
-                Votre rôle : <strong>{user.role}</strong>
-              </p>
-            )}
-            {role === 'admin' && (
-              <div className="text-lg text-gray-700 mb-4">
-                <p>Vous avez des privilèges d'administrateur.</p>
-               
-              </div>
-            )}
           </div>
         </div>
       </div>
