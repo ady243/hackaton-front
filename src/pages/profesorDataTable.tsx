@@ -1,4 +1,4 @@
-import GenericTable from '@/components/GenericTable';
+import GenericTable from '@/components/genericComponent/GenericTable';
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@radix-ui/react-checkbox";

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import GenericTable from '@/components/GenericTable';
+import GenericTable from '@/components/genericComponent/GenericTable';
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from '@tanstack/react-table';
 import { SessionCourse } from '@/interfaces/interaces';

@@ -1,6 +1,6 @@
 "use client";
-import FormBuilder from '@/components/FormBuilder';
-import TabBar from '@/components/TabBar';
+import FormBuilder from '@/components/genericComponent/FormBuilder';
+import TabBar from '@/components/genericComponent/TabBar';
 import ChatBubble from '@/components/ChatBubble';
 import React, { useState } from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';

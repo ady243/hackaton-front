@@ -1,5 +1,5 @@
 import React from 'react'
-import FormBuilder from '@/components/FormBuilder'
+import FormBuilder from '@/components/genericComponent/FormBuilder'
 
 function teacherLogin() {
     const fields = [

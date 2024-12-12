@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import FormBuilder from '@/components/FormBuilder';
+import FormBuilder from '@/components/genericComponent/FormBuilder';
 import { useAuth } from '@/context/AuthContext';
 
 const fields = [

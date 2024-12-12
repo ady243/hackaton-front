@@ -1,5 +1,5 @@
 import React from 'react';
-import GenericTable from '@/components/GenericTable';
+import GenericTable from '@/components/genericComponent/GenericTable';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { Subject } from '@/interfaces/interaces';
