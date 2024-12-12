@@ -6,13 +6,14 @@ import { MdEventNote, MdPerson, MdClass, MdLibraryBooks } from 'react-icons/md';
 
 function AccueilPage() {
   const { currentUser } = useAuth();
-  const user = currentUser();
+  const { user, token } = currentUser();
 
   useEffect(() => {
     if (user) {
       console.log('Current user:', user);
+      console.log('Token:', token);
     }
-  }, [user]);
+  }, [user, token]);
   
   return (
     <div className="flex">

@@ -9,7 +9,7 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: Partial<User>) => Promise<void>;
   logout: () => void;
-  currentUser: () => User | null;
+  currentUser: () => { user: User | null; token: string | null };
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   if (!isMounted) {
-    return null; 
+    return null; // Ne pas rendre le composant tant qu'il n'est pas monté
   }
 
   const login = async (email: string, password: string) => {
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const currentUser = () => {
-    return user;
+    return { user, token };
   };
 
   return (
