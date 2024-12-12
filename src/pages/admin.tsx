@@ -10,16 +10,11 @@ function AdminPage() {
   const [showChat, setShowChat] = useState(false);
   const [yearsGroupOptions, setYearsGroupOptions] = useState([]);
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  console.log("Token récupéré :", token);
 
   useEffect(() => {
     const fetchYearsGroups = async () => {
       try {
-        const response = await fetch(`${baseUrl}/years_groups`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(`${baseUrl}/years_groups`);
         if (response.ok) {
           const data = await response.json();
           const options = data.map((group: { id: number; name: string }) => ({
