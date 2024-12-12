@@ -9,7 +9,7 @@ import { AiOutlineRobot } from 'react-icons/ai';
 function AdminPage() {
   const [showChat, setShowChat] = useState(false);
   const [yearsGroupOptions, setYearsGroupOptions] = useState([]);
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null; 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   console.log("Token récupéré :", token);
 
   useEffect(() => {
@@ -38,6 +38,11 @@ function AdminPage() {
     fetchYearsGroups();
   }, [token]);
 
+  const sendCsvFields = [
+    { name: 'name', label: 'Nom du document', type: 'text' },
+    { name: 'csv', label: 'Fichier CSV', type: 'file' },
+  ];
+
   const createProfessorFields = [
     { name: 'first_name', label: 'Prénom', type: 'text', required: true },
     { name: 'last_name', label: 'Nom', type: 'text', required: true },
@@ -62,6 +67,31 @@ function AdminPage() {
     { name: 'session_duration', label: 'Durée de session (h)', type: 'number', required: true },
     { name: 'start_at', label: 'Date de début', type: 'date', required: true },
     { name: 'end_at', label: 'Date de fin', type: 'date', required: true },
+  ];
+
+  const assignCourseFields = [
+    {
+      name: 'name',
+      label: 'Nom du professeur',
+      type: 'select',
+      options: [
+        { value: 'professor1', label: 'Professeur 1' },
+        { value: 'professor2', label: 'Professeur 2' },
+        { value: 'professor3', label: 'Professeur 3' },
+      ],
+    },
+    {
+      name: 'course',
+      label: 'Nom du cours',
+      type: 'select',
+      options: [
+        { value: 'cours1', label: 'Cours 1' },
+        { value: 'cours2', label: 'Cours 2' },
+        { value: 'cours3', label: 'Cours 3' },
+      ],
+    },
+    { name: 'startDate', label: 'Date de début', type: 'date' },
+    { name: 'endDate', label: 'Date de fin', type: 'date' },
   ];
 
   const tabs = [
@@ -95,6 +125,26 @@ function AdminPage() {
           fields={createSubjectFields}
           apiEndpoint={`${baseUrl}/subjects`}
           buttonText="Créer une matière"
+        />
+      ),
+    },
+    {
+      name: 'Attribuer un cours au prof',
+      content: (
+        <FormBuilder
+          fields={assignCourseFields}
+          apiEndpoint="https://api.planify.com/assign-course"
+          buttonText="Attribuer un cours au prof"
+        />
+      ),
+    },
+    {
+      name: 'Envoyer un fichier CSV',
+      content: (
+        <FormBuilder
+          fields={sendCsvFields}
+          apiEndpoint="https://api.planify.com/send-csv"
+          buttonText="Envoyer le fichier"
         />
       ),
     },
