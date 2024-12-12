@@ -3,12 +3,18 @@ export interface User {
     subjects_id: number;
     email: string;
     password: string;
-    role: 'ADMIN' | 'TEACHER' | 'STUDENT'; 
+    role: 'ADMIN' | 'TEACHER' ; 
     firstname: string;
     lastname: string;
     last_login: Date;
     created_at: Date;
     updated_at: Date;
+  }
+
+  export interface PartialUser {
+    firstname: string;
+    email: string;
+    password: string;
   }
   
   export interface Subject {

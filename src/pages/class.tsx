@@ -71,8 +71,8 @@ const columns: ColumnDef<Class>[] = [
 function ClassPage() {
   const actions = (row: Class) => (
     <div className="flex space-x-2">
-      <Button variant="outline" size="sm">Edit</Button>
-      <Button variant="outline" size="sm">Delete</Button>
+      <Button  className = 'bg-green-500 text-white' variant="outline" size="sm">Modifier</Button>
+      <Button  className = 'bg-red-400 text-white' variant="outline" size="sm">Supprimer</Button>
     </div>
   );
 

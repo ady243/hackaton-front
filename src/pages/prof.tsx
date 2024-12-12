@@ -86,10 +86,10 @@ function ProffesorPageAdmin() {
 
   const actions = (row: SessionCourse) => (
     <div className="flex space-x-2">
-      <Button className='bg-green-600' variant="outline" size="sm" onClick={() => handleStatusChange(row.id, 'CONFIRMED')}>
+      <Button className='bg-green-500 text-white' variant="outline" size="sm" onClick={() => handleStatusChange(row.id, 'CONFIRMED')}>
         Accepter
       </Button>
-      <Button className='bg-red-600' variant="outline" size="sm" onClick={() => handleStatusChange(row.id, 'REFUSED')}>
+      <Button className='bg-red-400 text-white' variant="outline" size="sm" onClick={() => handleStatusChange(row.id, 'REFUSED')}>
         Refuser
       </Button>
     </div>

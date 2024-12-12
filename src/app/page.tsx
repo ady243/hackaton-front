@@ -1,13 +1,19 @@
 "use client";
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
   const router = useRouter();
+  const { token } = useAuth();
 
   useEffect(() => {
-    router.push('/accueil');
-  }, [router]);
+    if (!token) {
+      router.push('/accueil');
+    } else {
+      router.push('/accueil');
+    }
+  }, [router, token]);
 
   return null;
 }

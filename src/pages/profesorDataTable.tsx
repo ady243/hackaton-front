@@ -8,31 +8,26 @@ const data = [
   {
     id: "m5gr84i9",
     name: 'Ken',
-    status: "success",
     email: "ken99@yahoo.com",
   },
   {
     id: "3u1reuv4",
     name: 'Abe',
-    status: "success",
     email: "Abe45@gmail.com",
   },
   {
     id: "derv1ws0",
     name: 'Monserrat',
-    status: "processing",
     email: "Monserrat44@gmail.com",
   },
   {
     id: "5kma53ae",
     name: 'Silas',
-    status: "success",
     email: "Silas22@gmail.com",
   },
   {
     id: "bhqecj4p",
     name: 'Carmella',
-    status: "processing",
     email: "carmella@hotmail.com",
   },
 ];
@@ -41,82 +36,75 @@ const columns = [
   {
     id: "select",
     header: ({ table }: { table: any }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Sélectionner tout"
-      />
+      <div className="flex justify-center">
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Sélectionner tout"
+        />
+      </div>
     ),
     cell: ({ row }: { row: any }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Sélectionner la ligne"
-      />
+      <div className="flex justify-center">
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Sélectionner la ligne"
+        />
+      </div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: { row: any }) => {
-      const status = row.getValue("status");
-      let colorClass = "";
-
-      switch (status) {
-        case "success":
-          colorClass = "text-green-600";
-          break;
-        case "processing":
-          colorClass = "text-yellow-600";
-          break;
-        case "failed":
-          colorClass = "text-red-600";
-          break;
-        case "pending":
-          colorClass = "text-blue-600";
-          break;
-        default:
-          colorClass = "text-gray-600";
-      }
-
-      return <div className={`capitalize ${colorClass}`}>{status}</div>;
-    },
+    accessorKey: "name",
+    header: ({ column }: { column: any }) => (
+      <div className="flex justify-start">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Nom
+          <ArrowUpDown className="ml-2" />
+        </Button>
+      </div>
+    ),
+    cell: ({ row }: { row: any }) => <div className="text-left">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "email",
-    header: ({ column }: { column: any }) => {
-      return (
+    header: ({ column }: { column: any }) => (
+      <div className="flex justify-start">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Email
-          <ArrowUpDown />
+          <ArrowUpDown className="ml-2" />
         </Button>
-      );
-    },
-    cell: ({ row }: { row: any }) => <div className="lowercase">{row.getValue("email")}</div>,
+      </div>
+    ),
+    cell: ({ row }: { row: any }) => <div className="text-left lowercase">{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "name",  
-    header: () => <div className="text-right">Nom</div>,
+    id: "actions",
+    header: () => <div className="text-center">Actions</div>,
+    cell: ({ row }: { row: any }) => (
+      <div className="flex justify-center space-x-2">
+        <Button className="bg-green-500 text-white" variant="outline" size="sm">Modifier</Button>
+        <Button className="bg-red-400 text-white" variant="outline" size="sm">Supprimer</Button>
+      </div>
+    ),
+    enableSorting: false,
+    enableHiding: false,
   },
-];  
+];
 
 function ProfesorDataTablePage() {
-  const actions = (row: any) => (
-    <div className="flex space-x-2">
-      <Button variant="outline" size="sm">Edit</Button>
-      <Button variant="outline" size="sm">Delete</Button>
-    </div>
-  );
-
-  return <GenericTable data={data} columns={columns} filterColumn="email" actions={actions} />;
+  return <GenericTable data={data} columns={columns} filterColumn="email" />;
 }
 
 export default ProfesorDataTablePage;

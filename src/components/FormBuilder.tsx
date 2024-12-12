@@ -1,15 +1,15 @@
 "use client";
 
-
 import React, { useState } from 'react';
 
 interface FormBuilderProps {
-  fields: { name: string; label: string; type: string; options?: { value: string; label: string }[] }[];
-  apiEndpoint: string;
+  fields: { name: string; label: string; type: string; options?: { value: string; label: string }[]; required?: boolean }[];
+  apiEndpoint?: string;
   buttonText?: string;
+  onSubmit?: (formData: Record<string, string>) => Promise<void>;
 }
 
-function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuilderProps) {
+function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre", onSubmit }: FormBuilderProps) {
   const [formData, setFormData] = useState(
     fields.reduce((acc, field) => {
       acc[field.name] = '';
@@ -27,21 +27,25 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuil
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const response = await fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        console.log('Form data submitted successfully');
-      } else {
-        console.error('Failed to submit form data');
+    if (onSubmit) {
+      await onSubmit(formData);
+    } else if (apiEndpoint) {
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        if (response.ok) {
+          console.log('Form data submitted successfully');
+        } else {
+          console.error('Failed to submit form data');
+        }
+      } catch (error) {
+        console.error('Error submitting form data:', error);
       }
-    } catch (error) {
-      console.error('Error submitting form data:', error);
     }
   };
 
@@ -58,7 +62,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuil
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              required
+              required={field.required}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="">Sélectionnez une option</option>
@@ -74,7 +78,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuil
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              required
+              required={field.required}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           ) : (
@@ -84,7 +88,7 @@ function FormBuilder({ fields, apiEndpoint, buttonText = "Soumettre" }: FormBuil
               name={field.name}
               value={formData[field.name]}
               onChange={handleChange}
-              required
+              required={field.required}
               className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             />
           )}

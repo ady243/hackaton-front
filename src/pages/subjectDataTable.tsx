@@ -92,8 +92,8 @@ const columns: ColumnDef<Subject>[] = [
 function SubjectDataTable() {
   const actions = (row: Subject) => (
     <div className="flex space-x-2">
-      <Button variant="outline" size="sm">Modifier </Button>
-      <Button variant="outline" size="sm"> Supprimer</Button>
+      <Button  className = 'bg-green-500 text-white' variant="outline" size="sm">Modifier </Button>
+      <Button className = 'bg-red-400 text-white' variant="outline" size="sm"> Supprimer</Button>
     </div>
   );
 

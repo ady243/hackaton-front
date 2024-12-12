@@ -5,11 +5,13 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import frLocale from '@fullcalendar/core/locales/fr';
+import tippy from 'tippy.js';
+import '../pages/css/calendar.css';
 
 export default function Calendar() {
   return (
-    <div className="flex items-center justify-end min-h-screen">
-      <div className="w-full max-w-6xl p-4 bg-white rounded">
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-6xl p-4 bg-white rounded-lg ml-64">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek" 
@@ -37,6 +39,18 @@ export default function Calendar() {
           eventClick={(info) => {
             alert('Event: ' + info.event.title);
             info.el.style.borderColor = 'red';
+          }}
+          eventDidMount={(info) => {
+            tippy(info.el, {
+              content: `
+                <strong>${info.event.title}</strong><br>
+                Début: ${info.event.start ? info.event.start.toLocaleString() : 'N/A'}<br>
+                Fin: ${info.event.end ? info.event.end.toLocaleString() : 'N/A'}
+              `,
+              allowHTML: true,
+              placement: 'top',
+              theme: 'light-border',
+            });
           }}
         />
       </div>
