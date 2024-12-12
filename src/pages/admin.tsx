@@ -10,7 +10,6 @@ function AdminPage() {
   const [showChat, setShowChat] = useState(false);
   const [yearsGroupOptions, setYearsGroupOptions] = useState([]);
 
-  // Fetch years groups on component mount
   useEffect(() => {
     const fetchYearsGroups = async () => {
       try {
@@ -45,17 +44,16 @@ function AdminPage() {
       name: 'years_group_id',
       label: 'Promotion',
       type: 'select',
-      options: yearsGroupOptions, // Dynamic options
+      options: yearsGroupOptions,
     },
   ];
 
-  const createCourseFields = [
-    { name: 'className', label: 'Nom de la classe', type: 'text' },
-    { name: 'fieldName', label: 'Nom du champ', type: 'text' },
-    { name: 'subjectName', label: 'Nom du sujet', type: 'text' },
-    { name: 'hourlyVolume', label: 'Volume horaire', type: 'number' },
-    { name: 'startAt', label: 'Date de début', type: 'date' },
-    { name: 'endAt', label: 'Date de fin', type: 'date' },
+  const createSubjectFields = [
+    { name: 'name', label: 'Nom de matière', type: 'text' },
+    { name: 'hourly_volume', label: 'Volume horaire', type: 'number' },
+    { name: 'session_duration', label: 'Durée de session (h)', type: 'number' },
+    { name: 'start_at', label: 'Date de début', type: 'date' },
+    { name: 'end_at', label: 'Date de fin', type: 'date' },
   ];
 
   const assignCourseFields = [
@@ -105,12 +103,12 @@ function AdminPage() {
       ),
     },
     {
-      name: 'Créer un cours',
+      name: 'Créer une matière',
       content: (
         <FormBuilder
-          fields={createCourseFields}
-          apiEndpoint={`${baseUrl}/courses/create`}
-          buttonText="Créer un cours"
+          fields={createSubjectFields}
+          apiEndpoint={`${baseUrl}/subjects`}
+          buttonText="Créer un une matière"
         />
       ),
     },
