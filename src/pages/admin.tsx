@@ -260,12 +260,12 @@ function AdminPage() {
       content: (
         <FormBuilder
           fields={sendCsvFields}
-          apiEndpoint={`${baseUrl}/educational_courses/import`}
           buttonText="Envoyer le fichier"
           onSubmit={async (formData) => {
-            const yearsGroupId = formData.years_group_id;
+            const yearsGroupId = formData.get('years_group_id') as string;
+            const csvFile = formData.get('csv') as File;
             const formDataToSend = new FormData();
-            formDataToSend.append('csv', formData.csv);
+            formDataToSend.append('file', csvFile); // Assurez-vous que le champ est nommé 'file'
 
             try {
               const response = await fetch(`${baseUrl}/educational_courses/import/${yearsGroupId}`, {

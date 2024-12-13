@@ -1,42 +1,40 @@
 "use client";
 
-import FormBuilder from '@/components/genericComponent/FormBuilder';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import ProgressBar from '@/components/genericComponent/ProgressBar';
 import baseUrl from '@/config/baseUrl';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { InvitationData } from '@/interfaces/interaces';
-
-
 
 export default function RegisterTeacher() {
   const router = useRouter();
   const { security } = router.query;
-  const { token } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [progressMessage, setProgressMessage] = useState('');
   const [progressType, setProgressType] = useState<'success' | 'error'>('success');
   const [invitationData, setInvitationData] = useState<InvitationData | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [formData, setFormData] = useState({
+    password: '',
+    phone_number: '',
+  });
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
     const verifyToken = async () => {
       try {
+        console.log('Security token:', security); 
         const response = await fetch(`${baseUrl}/users/invitation/accept/${security}`, {
           method: 'GET',
         });
 
         if (response.ok) {
           const data: InvitationData = await response.json();
+          console.log('Invitation Data:', data); 
           setInvitationData(data);
         } else {
-          throw new Error('Invalid or expired token.');
+          const errorDetail = await response.json();
+          console.error('Error Detail:', errorDetail); 
+          setErrorMessage('Le lien est invalide ou expiré.');
         }
       } catch (error) {
         console.error('Error verifying token:', error);
@@ -47,44 +45,27 @@ export default function RegisterTeacher() {
     if (security) {
       verifyToken();
     }
-  }, [security, token, router]);
+  }, [security, router]);
 
-  const fields = [
-    {
-      name: 'first_name' as const,
-      label: 'Prénom',
-      type: 'text',
-      value: invitationData?.first_name || '',
-      disabled: true,
-      required: false,
-    },
-    {
-      name: 'last_name' as const,
-      label: 'Nom',
-      type: 'text',
-      value: invitationData?.last_name || '',
-      disabled: true,
-      required: false,
-    },
-    {
-      name: 'email' as const,
-      label: 'Email',
-      type: 'email',
-      value: invitationData?.email || '',
-      disabled: true,
-      required: false,
-    },
-    { name: 'password' as const, label: 'Mot de passe', type: 'password', required: true },
-    { name: 'phone_number' as const, label: 'Numéro de téléphone', type: 'text', required: true },
-  ];
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = async (formData: Record<string, string>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formDataObj = {
+      ...formData,
+      first_name: invitationData?.first_name || '',
+      last_name: invitationData?.last_name || '',
+      email: invitationData?.email || '',
+    };
+    console.log('Form Data:', formDataObj); 
     try {
-      setIsRegistering(true);
       const response = await fetch(`${baseUrl}/users/register-by-invitation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: { ...formData }, token: security }),
+        body: JSON.stringify({ user: formDataObj, token: security }),
       });
 
       if (response.ok) {
@@ -95,7 +76,8 @@ export default function RegisterTeacher() {
         }, 2000);
       } else {
         const errorDetail = await response.json();
-        throw new Error(errorDetail?.detail || 'Échec de l’inscription.');
+        console.error('Error Detail:', errorDetail);
+        setErrorMessage(errorDetail?.detail || 'Échec de l’inscription.');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -115,7 +97,70 @@ export default function RegisterTeacher() {
         {errorMessage ? (
           <p className="text-red-500">{errorMessage}</p>
         ) : (
-          <FormBuilder fields={fields} onSubmit={handleSubmit} buttonText="S'enregistrer" />
+          invitationData && (
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label htmlFor="first_name" className="block mb-2 text-sm font-medium">Prénom</label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                  value={invitationData.first_name}
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="last_name" className="block mb-2 text-sm font-medium">Nom</label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                  value={invitationData.last_name}
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="email" className="block mb-2 text-sm font-medium">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                  value={invitationData.email}
+                  disabled
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="block mb-2 text-sm font-medium">Mot de passe</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="phone_number" className="block mb-2 text-sm font-medium">Numéro de téléphone</label>
+                <input
+                  type="text"
+                  id="phone_number"
+                  name="phone_number"
+                  className="border border-gray-300 rounded-md p-2 w-full"
+                  required
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                />
+              </div>
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600">
+                S&apos;enregistrer
+              </button>
+            </form>
+          )
         )}
       </div>
     </div>

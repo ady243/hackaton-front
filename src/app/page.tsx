@@ -8,9 +8,10 @@ export default function Home() {
   const { token } = useAuth();
 
   useEffect(() => {
-    if (!token) {
+    const currentPath = window.location.pathname;
+    if (!token && currentPath !== '/registerTeacher') {
       router.push('/login');
-    } else {
+    } else if (token) {
       router.push('/accueil');
     }
   }, [router, token]);

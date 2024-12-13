@@ -129,9 +129,11 @@ export interface User {
     label: string;
     type: string;
     required: boolean;
+    value?: string | number | boolean | File; 
     defaultValue?: string;
     options?: { value: string; label: string }[];
     placeholder?: string;
+    disabled?: boolean;
   }
   interface ProgressBarProps {
     message: string;
@@ -161,11 +163,11 @@ export interface User {
     fields: FormField[];
     apiEndpoint?: string;
     buttonText: string;
-    onSubmit?: (formData: Record<string, string>) => Promise<void>;
+    onSubmit?: (data: FormData) => Promise<void>;
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
+    onReset?: () => void;
   }
-
 
 
   interface Assignment {
