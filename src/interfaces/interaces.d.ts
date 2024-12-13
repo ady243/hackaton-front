@@ -63,13 +63,43 @@ export interface User {
   export interface SessionCourse {
     id: number;
     classrooms_id: number;
-    statuts: 'PENDING' | 'REFUSED' | 'CONFIRMED';
-    assignments_courses_id: number;
+    assignments_subjects_id: number;
     comment: string;
+    status: 'PENDING' | 'REFUSED' | 'CONFIRMED';
     start_at: Date;
     end_at: Date;
+    classroom_info: {
+      id: number;
+      name: string;
+      capacity: number;
+    };
+    assignment_info: {
+      id: number;
+      classes_id: number;
+      subjects_id: number;
+      users_id: number;
+      url_online: string;
+      class_info: {
+        id: number;
+        name: string;
+        number_students: number;
+      };
+      subject_info: {
+        id: number;
+        name: string;
+        hourly_volume: number;
+        session_duration: number;
+        start_at: Date;
+        end_at: Date;
+      };
+      user_info: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        email: string;
+      };
+    };
   }
-  
   export interface Classroom {
     id: number;
     name: string;
@@ -94,25 +124,44 @@ export interface User {
     role?: 'ADMIN' | 'TEACHER';
   }
 
-  interface FormField {
-    name: keyof User | 'phone_number' | 'role';
+  export interface FormField {
+    name: keyof User | 'phone_number' | 'role' | 'number_students' | 'years_group_id' | 'name' | 'hourly_volume' | 'session_duration' | 'start_at' | 'end_at' | 'users_id' | 'courses_id' | 'classes_id' | 'url_online' | 'csv';
     label: string;
     type: string;
     required: boolean;
     defaultValue?: string;
+    options?: { value: string; label: string }[];
+    placeholder?: string;
   }
-
-
   interface ProgressBarProps {
     message: string;
     type: 'success' | 'error';
   }
   
 
-  interface PopupProps {
+  export interface PopupProps {
     title: string;
-    message: string;
+    message?: string;
     onConfirm: () => void;
     onCancel: () => void;
+    children?: React.ReactNode; 
   }
   
+  interface YearsGroup {
+    id: number;
+    name: string;
+  }
+  interface InvitationData {
+    first_name: string;
+    last_name: string;
+    email: string;
+  }
+
+  export interface FormBuilderProps {
+    fields: FormField[];
+    apiEndpoint?: string;
+    buttonText: string;
+    onSubmit?: (formData: Record<string, string>) => Promise<void>;
+    onSuccess?: (message: string) => void;
+    onError?: (message: string) => void;
+  }

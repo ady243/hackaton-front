@@ -1,3 +1,4 @@
+import ProgressBar from '@/components/genericComponent/ProgressBar';
 import baseUrl from '@/config/baseUrl';
 import { useAuth } from '@/context/AuthContext';
 import React, { useEffect, useState } from 'react';
@@ -11,7 +12,9 @@ const ProffesorPageAdmin = () => {
   const [addedItems, setAddedItems] = useState<{ date: string; startAt: string; endAt: string; isSelected: boolean }[]>([]);
   const { currentUser } = useAuth();
   const { user, token } = currentUser();
-  const [role, setRole] = useState<string | null>(null);
+  const [, setRole] = useState<string | null>(null);
+  const [progressMessage, setProgressMessage] = useState<string | null>(null);
+  const [progressType, setProgressType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     if (user) {
@@ -52,42 +55,48 @@ const ProffesorPageAdmin = () => {
       return;
     }
 
-    const dataToSend = selectedItems.map((item) => ({
-      users_id: user?.id,
-      comment: comment || 'Pas de commentaire',
-      start_at: `${item.date}T${item.startAt}:00`, 
-      end_at: `${item.date}T${item.endAt}:00`,
-      is_recurring: false,
-
-    }));
-
     try {
-      const response = await fetch(`${baseUrl}/availabilities/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      for (const item of selectedItems) {
+        const dataToSend = {
+          users_id: user?.id,
+          comment: comment || 'Pas de commentaire',
+          start_at: `${item.date}T${item.startAt}:00`, 
+          end_at: `${item.date}T${item.endAt}:00`,
+          is_recurring: false,
+        };
 
-      if (response.ok) {
-        alert('Données envoyées avec succès');
-        setAddedItems([]);
-        setComment(''); 
-      } else {
-        const error = await response.json();
-        console.error('Erreur lors de l\'envoi des données:', error);
-        alert('Une erreur est survenue lors de l\'envoi des données.');
+        const response = await fetch(`${baseUrl}/availabilities/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(dataToSend),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Erreur lors de l\'envoi des données:', error);
+          setProgressMessage('Une erreur est survenue lors de l\'envoi des données.');
+          setProgressType('error');
+          return;
+        }
       }
+
+      setProgressMessage('Données envoyées avec succès');
+      setProgressType('success');
+      setAddedItems([]);
+      setComment(''); 
     } catch (error) {
       console.error('Erreur réseau:', error);
-      alert('Impossible de se connecter au serveur.');
+      setProgressMessage('Impossible de se connecter au serveur.');
+      setProgressType('error');
     }
   };
 
   return (
     <div className="flex justify-center items-start mt-10 top-16 ml-24">
+      {progressMessage && <ProgressBar message={progressMessage} type={progressType} />}
       <div className="w-1/3 p-4">
         <h2 className="text-xl font-semibold mb-4">Ajouter Disponibilités</h2>
         <div className="mb-4">

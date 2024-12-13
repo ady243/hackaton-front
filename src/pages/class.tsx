@@ -37,11 +37,6 @@ const columns: ColumnDef<Class>[] = [
     cell: ({ row }) => <div>{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "fields_id",
-    header: "ID du champ",
-    cell: ({ row }) => <div>{row.getValue("fields_id")}</div>,
-  },
-  {
     accessorKey: "number_students",
     header: "Nombre d'étudiants",
     cell: ({ row }) => <div>{row.getValue("number_students")}</div>,
@@ -60,6 +55,7 @@ function ClassPage() {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<Class>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,6 +101,7 @@ function ClassPage() {
   };
 
   const handleEdit = async (id: number, updatedClass: Partial<Class>) => {
+    console.log('Updated class data:', updatedClass); // Ajoutez cette ligne pour vérifier les données mises à jour
     try {
       const response = await fetch(`${baseUrl}/classes/${id}`, {
         method: 'PUT',
@@ -125,9 +122,14 @@ function ClassPage() {
     }
   };
 
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const actions = (row: Class) => (
     <div className="flex space-x-2">
-      {user?.role === 'ADMIN' && (
+      {user?.role && user.role.toLowerCase() === 'admin' && (
         <>
           <Button
             className='bg-green-500 text-white'
@@ -135,6 +137,7 @@ function ClassPage() {
             size="sm"
             onClick={() => {
               setSelectedClass(row);
+              setEditFormData({ name: row.name });
               setShowEditPopup(true);
             }}
           >
@@ -173,13 +176,28 @@ function ClassPage() {
       {showEditPopup && selectedClass && (
         <Popup
           title="Modifier la classe"
-          message={`Êtes-vous sûr de vouloir modifier la classe ${selectedClass.name} ?`}
           onConfirm={() => {
-            handleEdit(selectedClass.id, { name: 'Updated Name' });
+            handleEdit(selectedClass.id, editFormData);
             setShowEditPopup(false);
           }}
           onCancel={() => setShowEditPopup(false)}
-        />
+        >
+          <form>
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Nom de la classe
+              </label>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                value={editFormData.name ?? ''}
+                onChange={handleEditFormChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              />
+            </div>
+          </form>
+        </Popup>
       )}
     </div>
   );

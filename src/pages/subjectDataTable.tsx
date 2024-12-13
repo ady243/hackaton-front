@@ -57,6 +57,7 @@ function SubjectDataTable() {
   const { user, token } = currentUser();
   const [data, setData] = useState<Subject[]>([]);
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -123,7 +124,7 @@ function SubjectDataTable() {
 
   const actions = (row: Subject) => (
     <div className="flex space-x-2">
-      {user?.role === 'ADMIN' && (
+      {user?.role && user.role.toLowerCase() === 'admin' && (
         <>
           <Button
             className='bg-green-500 text-white'

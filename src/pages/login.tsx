@@ -7,8 +7,8 @@ import FormBuilder from '@/components/genericComponent/FormBuilder';
 import { useAuth } from '@/context/AuthContext';
 
 const fields = [
-  { name: 'email', label: 'Email', type: 'email', required: true },
-  { name: 'password', label: 'Mot de passe', type: 'password', required: true },
+  { name: 'email' as const, label: 'Email', type: 'email', required: true },
+  { name: 'password' as const, label: 'Mot de passe', type: 'password', required: true },
 ];
 
 function LoginPage() {

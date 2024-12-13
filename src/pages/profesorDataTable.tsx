@@ -1,41 +1,15 @@
+import React, { useEffect, useState } from 'react';
 import GenericTable from '@/components/genericComponent/GenericTable';
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { ArrowUpDown } from 'lucide-react';
+import baseUrl from '@/config/baseUrl';
+import { useAuth } from '@/context/AuthContext';
 
-const data = [
-  {
-    id: "m5gr84i9",
-    name: 'Ken',
-    email: "ken99@yahoo.com",
-  },
-  {
-    id: "3u1reuv4",
-    name: 'Abe',
-    email: "Abe45@gmail.com",
-  },
-  {
-    id: "derv1ws0",
-    name: 'Monserrat',
-    email: "Monserrat44@gmail.com",
-  },
-  {
-    id: "5kma53ae",
-    name: 'Silas',
-    email: "Silas22@gmail.com",
-  },
-  {
-    id: "bhqecj4p",
-    name: 'Carmella',
-    email: "carmella@hotmail.com",
-  },
-];
-
-const columns = [
+const columns = (userRole: string) => [
   {
     id: "select",
-    header: ({ table }: { table: any }) => (
+    header: ({ table }: { table: { getIsAllPageRowsSelected: () => boolean; getIsSomePageRowsSelected: () => boolean; toggleAllPageRowsSelected: (value: boolean) => void; }; }) => (
       <div className="flex justify-center">
         <Checkbox
           checked={
@@ -47,7 +21,7 @@ const columns = [
         />
       </div>
     ),
-    cell: ({ row }: { row: any }) => (
+    cell: ({ row }: { row: { getIsSelected: () => boolean; toggleSelected: (value: boolean) => void; getValue: (columnId: string) => string; }; }) => (
       <div className="flex justify-center">
         <Checkbox
           checked={row.getIsSelected()}
@@ -61,7 +35,7 @@ const columns = [
   },
   {
     accessorKey: "name",
-    header: ({ column }: { column: any }) => (
+    header: ({ column }: { column: { toggleSorting: (desc: boolean) => void; getIsSorted: () => string | false; }; }) => (
       <div className="flex justify-start">
         <Button
           variant="ghost"
@@ -72,11 +46,11 @@ const columns = [
         </Button>
       </div>
     ),
-    cell: ({ row }: { row: any }) => <div className="text-left">{row.getValue("name")}</div>,
+    cell: ({ row }: { row: { getValue: (columnId: string) => string } }) => <div className="text-left">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "email",
-    header: ({ column }: { column: any }) => (
+    header: ({ column }: { column: { toggleSorting: (desc: boolean) => void; getIsSorted: () => string | false; }; }) => (
       <div className="flex justify-start">
         <Button
           variant="ghost"
@@ -87,16 +61,18 @@ const columns = [
         </Button>
       </div>
     ),
-    cell: ({ row }: { row: any }) => <div className="text-left lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }: { row: { getValue: (columnId: string) => string } }) => <div className="text-left lowercase">{row.getValue("email")}</div>,
   },
   {
     id: "actions",
     header: () => <div className="text-center">Actions</div>,
-    cell: ({ row }: { row: any }) => (
-      <div className="flex justify-center space-x-2">
-        <Button className="bg-green-500 text-white" variant="outline" size="sm">Modifier</Button>
-        <Button className="bg-red-400 text-white" variant="outline" size="sm">Supprimer</Button>
-      </div>
+    cell: () => (
+      userRole.toLowerCase() === 'admin' ? (
+        <div className="flex justify-center space-x-2">
+          <Button className="bg-green-500 text-white" variant="outline" size="sm">Modifier</Button>
+          <Button className="bg-red-400 text-white" variant="outline" size="sm">Supprimer</Button>
+        </div>
+      ) : null
     ),
     enableSorting: false,
     enableHiding: false,
@@ -104,7 +80,38 @@ const columns = [
 ];
 
 function ProfesorDataTablePage() {
-  return <GenericTable data={data} columns={columns} filterColumn="email" />;
+  const [data, setData] = useState([]);
+  const { currentUser } = useAuth();
+  const { user, token } = currentUser();
+
+  useEffect(() => {
+    const fetchProfessors = async () => {
+      try {
+        const response = await fetch(`${baseUrl}/users/teachers`);
+        if (response.ok) {
+          const result = await response.json();
+          const formattedData = result.map((professor: { id: number; first_name: string; last_name: string; email: string }) => ({
+            id: professor.id,
+            name: `${professor.first_name} ${professor.last_name}`,
+            email: professor.email,
+          }));
+          setData(formattedData);
+        } else {
+          console.error('Failed to fetch professors');
+        }
+      } catch (error) {
+        console.error('Error fetching professors:', error);
+      }
+    };
+
+    fetchProfessors();
+  }, [token]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  return <GenericTable data={data} columns={columns(user.role)} filterColumn="email" />;
 }
 
 export default ProfesorDataTablePage;

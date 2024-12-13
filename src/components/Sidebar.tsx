@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 
 function Sidebar() {
   const router = useRouter();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { user, token } = currentUser();
   const [role, setRole] = useState<string | null>(null);
 
@@ -19,7 +19,7 @@ function Sidebar() {
     }
   }, [user, token]);
 
-  const excludedPaths = ['/login', '/register'];
+  const excludedPaths = ['/login', '/register', '/registerTeacher'];
   const defaultPath = '/calendar';
 
   useEffect(() => {
@@ -32,6 +32,11 @@ function Sidebar() {
     return null;
   }
 
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
+
   const styleText = {
     color: 'black',
     fontSize: '20px',
@@ -40,14 +45,14 @@ function Sidebar() {
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex',
-    flexDirection: 'row' as 'row',
+    flexDirection: 'row' as const,
     backgroundColor: 'white'
   };
 
   const menuItems = [
     { href: '/calendar', icon: <FaBuromobelexperte />, label: 'Planing' },
-    { href: '/admin', icon: <MdLaptopChromebook />, label: 'Mon espace admin' }, 
-    { href: '/mainProf', icon: <MdLaptopChromebook />, label: 'Mon espace professeur' },
+    role === 'admin' && { href: '/admin', icon: <MdLaptopChromebook />, label: 'Mon espace admin' }, 
+    role === 'teacher' && { href: '/mainProf', icon: <MdLaptopChromebook />, label: 'Mon espace professeur' },
     { href: '/profesorDataTable', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>, label: 'Les professeurs' },
     { href: '/subjectDataTable', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>, label: 'Les matières' },
     { href: '/class', icon: <AiOutlineInsertRowLeft />, label: 'Les classes' },
@@ -87,16 +92,17 @@ function Sidebar() {
           <div className="mt-auto">
             <ul className="flex flex-col py-4 space-y-1">
               <li>
-                <Link href="#" legacyBehavior>
-                  <a className="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                    <span className="inline-flex justify-center items-center ml-4">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                      </svg>
-                    </span>
-                    <span className="ml-2 text-sm tracking-wide truncate">Déconnexion</span>
-                  </a>
-                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6"
+                >
+                  <span className="inline-flex justify-center items-center ml-4">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                  </span>
+                  <span className="ml-2 text-sm tracking-wide truncate">Déconnexion</span>
+                </button>
               </li>
             </ul>
           </div>
