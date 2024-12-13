@@ -110,7 +110,7 @@ export default function RegisterTeacher() {
       {isRegistering && progressType === 'success' && (
         <ProgressBar message={progressMessage} type={progressType} />
       )}
-      <div className="w-full max-w-md p-8 space-y-6 rounded shadow-md">
+      <div className="w-full max-w-md p-8 space-y-6 ">
         <h2 className="text-2xl font-bold text-center">Finalisation de l'inscription</h2>
         {errorMessage ? (
           <p className="text-red-500">{errorMessage}</p>
