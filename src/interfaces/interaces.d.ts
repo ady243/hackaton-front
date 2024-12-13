@@ -165,3 +165,31 @@ export interface User {
     onSuccess?: (message: string) => void;
     onError?: (message: string) => void;
   }
+
+
+
+  interface Assignment {
+    id: number;
+    classes_id: number;
+    subjects_id: number;
+    users_id: number;
+    url_online: string;
+    class_info: {
+      id: number;
+      name: string;
+      number_students: number;
+    };
+    subject_info: {
+      id: number;
+      name: string;
+      hourly_volume: number;
+      session_duration: number;
+      start_at: string;
+      end_at: string;
+    };
+    user_info: {
+      id: number;
+      first_name: string;
+      last_name: string;
+    };
+  }

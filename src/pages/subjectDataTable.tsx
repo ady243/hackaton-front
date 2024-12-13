@@ -127,7 +127,7 @@ function SubjectDataTable() {
       {user?.role && user.role.toLowerCase() === 'admin' && (
         <>
           <Button
-            className='bg-green-500 text-white'
+            className='bg-yellow-500 text-white'
             variant="outline"
             size="sm"
             onClick={() => handleEdit(row.id, { name: 'Updated Name' })} 

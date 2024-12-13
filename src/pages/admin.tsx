@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import ChatBubble from '@/components/ChatBubble';
 import FormBuilder from '@/components/genericComponent/FormBuilder';
@@ -118,7 +119,14 @@ function AdminPage() {
   };
 
   const sendCsvFields: FormField[] = [
-    { name: 'name', label: 'Nom du document', type: 'text', required: true, placeholder: 'Entrez le nom du document' },
+    {
+      name: 'years_group_id',
+      label: 'Promotion',
+      type: 'select',
+      options: yearsGroupOptions,
+      required: true,
+      placeholder: 'Sélectionnez une promotion',
+    },
     { name: 'csv', label: 'Fichier CSV', type: 'file', required: true, placeholder: 'Choisissez un fichier CSV' },
   ];
 
@@ -252,9 +260,34 @@ function AdminPage() {
       content: (
         <FormBuilder
           fields={sendCsvFields}
-          apiEndpoint="https://api.planify.com/send-csv"
+          apiEndpoint={`${baseUrl}/educational_courses/import`}
           buttonText="Envoyer le fichier"
-          onSuccess={handleSuccess}
+          onSubmit={async (formData) => {
+            const yearsGroupId = formData.years_group_id;
+            const formDataToSend = new FormData();
+            formDataToSend.append('csv', formData.csv);
+
+            try {
+              const response = await fetch(`${baseUrl}/educational_courses/import/${yearsGroupId}`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+                body: formDataToSend,
+              });
+
+              if (response.ok) {
+                handleSuccess('Fichier CSV envoyé avec succès');
+              } else {
+                const error = await response.json();
+                handleError('Une erreur est survenue lors de l\'envoi du fichier CSV.');
+                console.error('Erreur lors de l\'envoi du fichier CSV:', error);
+              }
+            } catch (error) {
+              handleError('Impossible de se connecter au serveur.');
+              console.error('Erreur réseau:', error);
+            }
+          }}
           onError={handleError}
         />
       ),

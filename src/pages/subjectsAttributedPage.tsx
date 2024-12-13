@@ -157,7 +157,7 @@ function SubjectsAttributedPage() {
       cell: ({ row }: { row: Row<SessionCourse> }) => (
         user && user.role.toLowerCase() === 'teacher' ? (
           <div className="flex justify-center space-x-2">
-            <Button className="bg-green-500 text-white" variant="outline" size="sm" onClick={() => handleStatusChange(row.original.id, 'CONFIRMED')}>Accepter</Button>
+            <Button className="bg-yellow-500 text-white" variant="outline" size="sm" onClick={() => handleStatusChange(row.original.id, 'CONFIRMED')}>Accepter</Button>
             <Button className="bg-red-400 text-white" variant="outline" size="sm" onClick={() => handleStatusChange(row.original.id, 'REFUSED')}>Refuser</Button>
           </div>
         ) : null

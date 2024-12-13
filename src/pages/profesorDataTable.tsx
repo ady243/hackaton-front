@@ -63,20 +63,20 @@ const columns = (userRole: string) => [
     ),
     cell: ({ row }: { row: { getValue: (columnId: string) => string } }) => <div className="text-left lowercase">{row.getValue("email")}</div>,
   },
-  {
+  ...(userRole.toLowerCase() === 'admin' ? [{
     id: "actions",
     header: () => <div className="text-center">Actions</div>,
     cell: () => (
       userRole.toLowerCase() === 'admin' ? (
         <div className="flex justify-center space-x-2">
-          <Button className="bg-green-500 text-white" variant="outline" size="sm">Modifier</Button>
+          <Button className="bg-yellow-500 text-white" variant="outline" size="sm">Modifier</Button>
           <Button className="bg-red-400 text-white" variant="outline" size="sm">Supprimer</Button>
         </div>
       ) : null
     ),
     enableSorting: false,
     enableHiding: false,
-  },
+  }] : []),
 ];
 
 function ProfesorDataTablePage() {
