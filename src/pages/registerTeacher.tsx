@@ -5,6 +5,7 @@ import ProgressBar from '@/components/genericComponent/ProgressBar';
 import baseUrl from '@/config/baseUrl';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 interface InvitationData {
   first_name: string;
@@ -15,6 +16,7 @@ interface InvitationData {
 export default function RegisterTeacher() {
   const router = useRouter();
   const { security } = router.query;
+  const { token } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [progressMessage, setProgressMessage] = useState('');
   const [progressType, setProgressType] = useState<'success' | 'error'>('success');
@@ -22,6 +24,11 @@ export default function RegisterTeacher() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
     const verifyToken = async () => {
       try {
         const response = await fetch(`${baseUrl}/users/invitation/accept/${security}`, {
@@ -39,12 +46,11 @@ export default function RegisterTeacher() {
         setErrorMessage('Le lien est invalide ou expiré.');
       }
     };
-    
 
     if (security) {
       verifyToken();
     }
-  }, [security]);
+  }, [security, token, router]);
 
   const fields = [
     {
@@ -71,7 +77,6 @@ export default function RegisterTeacher() {
     { name: 'password', label: 'Mot de passe', type: 'password', required: true },
     { name: 'phone_number', label: 'Numéro de téléphone', type: 'text', required: true },
   ];
-  
 
   const handleSubmit = async (formData: Record<string, string>) => {
     try {
@@ -79,7 +84,7 @@ export default function RegisterTeacher() {
       const response = await fetch(`${baseUrl}/users/register-by-invitation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user:{...formData}, token: security }),
+        body: JSON.stringify({ user: { ...formData }, token: security }),
       });
 
       if (response.ok) {

@@ -21,7 +21,7 @@ function Sidebar() {
     }
   }, [user, token]);
 
-  const excludedPaths = ['/login', '/register'];
+  const excludedPaths = ['/login', '/register', '/registerTeacher'];
   const defaultPath = '/calendar';
 
   useEffect(() => {
