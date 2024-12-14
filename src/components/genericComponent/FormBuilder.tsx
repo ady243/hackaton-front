@@ -1,136 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { FormBuilderProps } from '@/interfaces/interaces';
-import { useAuth } from '@/context/AuthContext';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
-const FormBuilder: React.FC<FormBuilderProps> = ({ fields, apiEndpoint, buttonText, onSubmit, onSuccess, onError, onReset }) => {
-  const [formData, setFormData] = useState<Record<string, string | number | boolean | File>>({});
+export interface FormField {
+  name: string;
+  label: string;
+  type: "number" | "text" | "email" | "select" | "file" | "date";
+  required?: boolean;
+  placeholder?: string;
+  options?: { value: string; label: string }[];
+  validation?: (value: any, formData?: Record<string, any>) => string | null;
+  disabled?: boolean;
+}
+
+interface FormBuilderProps {
+  title?: string;
+  description?: string;
+  fields: FormField[];
+  apiEndpoint?: string;
+  buttonText: string;
+  onSubmit?: (formData: FormData | Record<string, any>) => void;
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
+const FormBuilder: React.FC<FormBuilderProps> = ({
+  title,
+  description,
+  fields,
+  apiEndpoint,
+  buttonText,
+  onSubmit,
+  onSuccess,
+  onError,
+}) => {
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
 
   useEffect(() => {
-    const initialFormData: Record<string, string | number | boolean | File> = {};
-    fields.forEach(field => {
-      if (field.value !== undefined) {
-        initialFormData[field.name] = field.value;
-      }
+    const initialFormData: Record<string, any> = {};
+    fields.forEach((field) => {
+      initialFormData[field.name] = "";
     });
     setFormData(initialFormData);
   }, [fields]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, files } = e.target as HTMLInputElement;
-    if (files && files.length > 0) {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+  const validateField = (name: string, value: any) => {
+    const field = fields.find((f) => f.name === name);
+    if (field?.required && !value) {
+      return `${field.label} est requis.`;
     }
+    if (field?.validation) {
+      return field.validation(value, formData);
+    }
+    return null;
+  };
+
+  const validateAllFields = () => {
+    const newErrors: Record<string, string | null> = {};
+    fields.forEach((field) => {
+      const error = validateField(field.name, formData[field.name]);
+      if (error) {
+        newErrors[field.name] = error;
+      }
+    });
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((error) => error);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, files } = e.target as HTMLInputElement;
+    const newValue = files && files.length > 0 ? files[0] : value;
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
+
+    const error = validateField(name, newValue);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const hasFile = Object.values(formData).some(value => value instanceof File);
-    let body: FormData | string;
-    const headers: HeadersInit = {
-      'Authorization': `Bearer ${token}`,
-    };
+    if (!validateAllFields()) {
+      return; 
+    }
+
+    setIsSubmitting(true);
+    let body: FormData | Record<string, any>;
+    const hasFile = Object.values(formData).some((value) => value instanceof File);
 
     if (hasFile) {
       const formDataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
         const value = formData[key];
-        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-          formDataToSend.append(key, String(value));
-        } else if (value instanceof File) {
-          formDataToSend.append(key, value);
-        }
+        formDataToSend.append(key, value);
       });
       body = formDataToSend;
     } else {
-      headers['Content-Type'] = 'application/json';
-      body = JSON.stringify(formData);
+      body = formData;
     }
 
-    console.log('Form Data:', body);
-
-    if (onSubmit) {
-      await onSubmit(body as FormData);
-    } else if (apiEndpoint) {
-      try {
+    try {
+      if (onSubmit) {
+        await onSubmit(body);
+      } else if (apiEndpoint) {
         const response = await fetch(apiEndpoint, {
-          method: 'POST',
-          headers,
-          body,
+          method: "POST",
+          headers: hasFile
+            ? { Authorization: `Bearer ${token}` }
+            : { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: hasFile ? (body as FormData) : JSON.stringify(body),
         });
 
         if (response.ok) {
-          if (onSuccess) onSuccess('Données envoyées avec succès');
-          if (onReset) onReset(); // Réinitialiser le formulaire
+          if (onSuccess) onSuccess();
         } else {
-          const error = await response.json();
-          if (onError) onError('Une erreur est survenue lors de l\'envoi des données.');
-          console.error('Erreur lors de l\'envoi des données:', error);
+          if (onError) onError();
         }
-      } catch (error) {
-        if (onError) onError('Impossible de se connecter au serveur.');
-        console.error('Erreur réseau:', error);
       }
+    } catch (error) {
+      if (onError) onError();
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {fields.map((field) => (
-        <div key={field.name} className="mb-4">
-          <label htmlFor={field.name} className="block mb-2 text-sm font-medium">
-            {field.label}
-          </label>
-          {field.type === 'select' ? (
-            <select
-              id={field.name}
-              name={field.name}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md p-2 w-full"
-              required={field.required}
-              value={String(formData[field.name] ?? '')}
-              disabled={field.disabled}
-            >
-              <option value="" disabled>{field.placeholder}</option>
-              {field.options && field.options.map((option: { value: string; label: string }) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+    <div className="bg-white p-6 rounded-md w-full max-w-lg">
+      {title && <h2 className="text-lg font-bold mb-2">{title}</h2>}
+      {description && <p className="text-sm text-gray-600 mb-4">{description}</p>}
+      <form onSubmit={handleSubmit} noValidate>
+        {fields.map((field) => (
+          <div key={field.name} className="mb-4">
+            <label htmlFor={field.name} className="block text-sm font-medium mb-1">
+              {field.label}
+            </label>
+            {field.type === "select" ? (
+              <select
+                id={field.name}
+                name={field.name}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+                className={`border rounded-md p-2 w-full ${
+                  errors[field.name] ? "border-red-500" : "border-gray-300"
+                }`}
+                disabled={field.disabled}
+              >
+                <option value="" disabled>
+                  {field.placeholder || "Sélectionnez une option"}
                 </option>
-              ))}
-            </select>
-          ) : field.type === 'file' ? (
-            <input
-              type={field.type}
-              id={field.name}
-              name={field.name}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md p-2 w-full"
-              required={field.required}
-              placeholder={field.placeholder}
-              disabled={field.disabled}
-            />
-          ) : (
-            <input
-              type={field.type}
-              id={field.name}
-              name={field.name}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-md p-2 w-full"
-              required={field.required}
-              value={String(formData[field.name] ?? '')}
-              placeholder={field.placeholder}
-              disabled={field.disabled}
-            />
-          )}
-        </div>
-      ))}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md w-full hover:bg-blue-600">
-        {buttonText}
-      </button>
-    </form>
+                {field.options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+                className={`border rounded-md p-2 w-full ${
+                  errors[field.name] ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder={field.placeholder}
+                disabled={field.disabled}
+              />
+            )}
+            {errors[field.name] && (
+              <p className="text-red-500 text-xs mt-1">{errors[field.name]}</p>
+            )}
+          </div>
+        ))}
+        <button
+          type="submit"
+          disabled={isSubmitting || Object.values(errors).some((error) => error)}
+          className={`w-full p-2 rounded-md text-white ${
+            isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+          }`}
+        >
+          {isSubmitting ? "Chargement..." : buttonText}
+        </button>
+      </form>
+    </div>
   );
 };
 
