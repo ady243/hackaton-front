@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import ChatBubble from '@/components/ChatBubble';
-import FormBuilder from '@/components/genericComponent/FormBuilder';
-import ProgressBar from '@/components/genericComponent/ProgressBar';
-import TabBar from '@/components/genericComponent/TabBar';
-import baseUrl from '@/config/baseUrl';
-import { FormField } from '@/interfaces/interaces';
-import { useEffect, useState } from 'react';
-import { AiOutlineRobot } from 'react-icons/ai';
+import { useEffect, useState, useCallback } from "react";
+import { AiOutlineRobot } from "react-icons/ai";
+import ChatBubble from "@/components/ChatBubble";
+import FormBuilder from "@/components/genericComponent/FormBuilder";
+import { FormField } from "@/components/genericComponent/FormBuilder";
+import TabBar from "@/components/genericComponent/TabBar";
+import apiService from "@/lib/apiService";
+import baseUrl from "@/config/baseUrl";
+
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AdminPage() {
   const [showChat, setShowChat] = useState(false);
@@ -15,289 +18,348 @@ function AdminPage() {
   const [professorOptions, setProfessorOptions] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
   const [classOptions, setClassOptions] = useState([]);
-  const [professors, setProfessors] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [progressMessage, setProgressMessage] = useState<string | null>(null);
-  const [progressType, setProgressType] = useState<'success' | 'error'>('success');
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  useEffect(() => {
-    const fetchYearsGroups = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/years_groups`);
-        if (response.ok) {
-          const data = await response.json();
-          const options = data.map((group: { id: number; name: string }) => ({
-            value: group.id,
-            label: group.name,
-          }));
-          setYearsGroupOptions(options);
-          console.log('Years Group Options:', options);
-        } else {
-          console.error('Failed to fetch years groups');
-        }
-      } catch (error) {
-        console.error('Error fetching years groups:', error);
-      }
-    };
-
-    const fetchProfessors = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/users/teachers`);
-        if (response.ok) {
-          const data = await response.json();
-          const options = data.map((user: { id: number; first_name: string; last_name: string }) => ({
-            value: user.id,
-            label: `${user.first_name}`,
-          }));
-          setProfessorOptions(options);
-          setProfessors(data);
-          console.log('Professor Options:', options);
-        } else {
-          console.error('Failed to fetch professors');
-        }
-      } catch (error) {
-        console.error('Error fetching professors:', error);
-      }
-    };
-
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/subjects/`);
-        if (response.ok) {
-          const data = await response.json();
-          const options = data.map((course: { id: number; name: string }) => ({
-            value: course.id,
-            label: course.name,
-          }));
-          setCourseOptions(options);
-          setCourses(data);
-          console.log('Course Options:', options);
-        } else {
-          console.error('Failed to fetch courses');
-        }
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-      }
-    };
-
-    const fetchClasses = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/classes`);
-        if (response.ok) {
-          const data = await response.json();
-          const options = data.map((classItem: { id: number; name: string }) => ({
-            value: classItem.id,
-            label: classItem.name,
-          }));
-          setClassOptions(options);
-          setClasses(data);
-          console.log('Class Options:', options);
-        } else {
-          console.error('Failed to fetch classes');
-        }
-      } catch (error) {
-        console.error('Error fetching classes:', error);
-      }
-    };
-
-    fetchYearsGroups();
-    fetchProfessors();
-    fetchCourses();
-    fetchClasses();
+  // Fetch data functions
+  const fetchYearsGroups = useCallback(async () => {
+    try {
+      const data = await apiService.fetchWithAuth(`${baseUrl}/years_groups`, {}, token);
+      setYearsGroupOptions(
+        data.map((group: { id: number; name: string }) => ({ value: group.id, label: group.name }))
+      );
+    } catch (error) {
+      console.error("Error fetching years groups:", error);
+    }
   }, [token]);
 
-  const handleSuccess = (message: string) => {
-    setProgressMessage(message);
-    setProgressType('success');
-  };
+  const fetchProfessors = useCallback(async () => {
+    try {
+      const data = await apiService.fetchWithAuth(`${baseUrl}/users/teachers`, {}, token);
+      setProfessorOptions(
+        data.map((prof: { id: number; first_name: string; last_name: string }) => ({
+          value: prof.id,
+          label: `${prof.first_name} ${prof.last_name}`,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching professors:", error);
+    }
+  }, [token]);
 
-  const handleError = (message: string) => {
-    setProgressMessage(message);
-    setProgressType('error');
-  };
+  const fetchCourses = useCallback(async () => {
+    try {
+      const data = await apiService.fetchWithAuth(`${baseUrl}/subjects/`, {}, token);
+      setCourseOptions(
+        data.map((course: { id: number; name: string }) => ({ value: course.id, label: course.name }))
+      );
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  }, [token]);
 
-  const sendCsvFields: FormField[] = [
-    {
-      name: 'years_group_id',
-      label: 'Promotion',
-      type: 'select',
-      options: yearsGroupOptions,
-      required: true,
-      placeholder: 'Sélectionnez une promotion',
-    },
-    { name: 'csv', label: 'Fichier CSV', type: 'file', required: true, placeholder: 'Choisissez un fichier CSV' },
-  ];
+  const fetchClasses = useCallback(async () => {
+    try {
+      const data = await apiService.fetchWithAuth(`${baseUrl}/classes`, {}, token);
+      setClassOptions(
+        data.map((classItem: { id: number; name: string }) => ({ value: classItem.id, label: classItem.name }))
+      );
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchYearsGroups();
+      fetchProfessors();
+      fetchCourses();
+      fetchClasses();
+    }
+  }, [token, fetchYearsGroups, fetchProfessors, fetchCourses, fetchClasses]);
+
+  const notifySuccess = (message: string) => toast.success(message, { position: "top-right", autoClose: 3000 });
+  const notifyError = (message: string) => toast.error(message, { position: "top-right", autoClose: 3000 });
 
   const createProfessorFields: FormField[] = [
-    { name: 'first_name', label: 'Prénom du professeur', type: 'text', required: true, placeholder: 'Entrez le prénom du professeur' },
-    { name: 'last_name', label: 'Nom du professeur', type: 'text', required: true, placeholder: 'Entrez le nom du professeur' },
-    { name: 'email', label: 'Email du professeur', type: 'email', required: true, placeholder: 'Entrez l\'email du professeur' },
+    {
+      name: "first_name",
+      label: "Prénom",
+      type: "text",
+      required: true,
+      placeholder: "Entrez le prénom",
+      validation: (value: string) => (value.length < 2 ? "Le prénom doit contenir au moins 2 caractères" : null),
+    },
+    {
+      name: "last_name",
+      label: "Nom",
+      type: "text",
+      required: true,
+      placeholder: "Entrez le nom",
+      validation: (value: string) => (value.length < 2 ? "Le nom doit contenir au moins 2 caractères" : null),
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      required: true,
+      placeholder: "Entrez l'email",
+      validation: (value: string) => (!/\S+@\S+\.\S+/.test(value) ? "L'email est invalide" : null),
+    },
   ];
 
   const createClassFields: FormField[] = [
-    { name: 'name', label: 'Nom de la classe', type: 'text', required: true, placeholder: 'Entrez le nom de la classe' },
-    { name: 'number_students', label: 'Nombre de places', type: 'number', required: true, placeholder: 'Entrez le nombre de places' },
     {
-      name: 'years_group_id',
-      label: 'Promotion',
-      type: 'select',
+      name: "name",
+      label: "Nom de la classe",
+      type: "text",
+      required: true,
+      placeholder: "Entrez le nom de la classe",
+      validation: (value: string) => (value.length < 3 ? "Le nom de la classe doit contenir au moins 3 caractères" : null),
+    },
+    {
+      name: "number_students",
+      label: "Nombre d'étudiants",
+      type: "number",
+      required: true,
+      placeholder: "Entrez le nombre d'étudiants",
+      validation: (value: number) => (value <= 0 ? "Le nombre d'étudiants doit être supérieur à 0" : null),
+    },
+    {
+      name: "years_group_id",
+      label: "Promotion",
+      type: "select",
       options: yearsGroupOptions,
       required: true,
-      placeholder: 'Sélectionnez une promotion',
+      placeholder: "Sélectionnez une promotion",
     },
   ];
 
+  // const createSubjectFields: FormField[] = [
+  //   {
+  //     name: "name",
+  //     label: "Nom de la matière",
+  //     type: "text",
+  //     required: true,
+  //     placeholder: "Entrez le nom de la matière",
+  //     validation: (value: string) => (value.length < 3 ? "Le nom de la matière doit contenir au moins 3 caractères" : null),
+  //   },
+  //   {
+  //     name: "hourly_volume",
+  //     label: "Volume horaire",
+  //     type: "number",
+  //     required: true,
+  //     placeholder: "Entrez le volume horaire",
+  //     validation: (value: number) => (value <= 0 ? "Le volume horaire doit être supérieur à 0" : null),
+  //   },
+  //   {
+  //     name: "session_duration",
+  //     label: "Durée de session (h)",
+  //     type: "number",
+  //     required: true,
+  //     placeholder: "Entrez la durée de la session",
+  //   },
+  //   {
+  //     name: "start_at",
+  //     label: "Date de début",
+  //     type: "date",
+  //     required: true,
+  //   },
+  //   {
+  //     name: "end_at",
+  //     label: "Date de fin",
+  //     type: "date",
+  //     required: true,
+  //   },
+  // ];
+
   const createSubjectFields: FormField[] = [
-    { name: 'name', label: 'Nom de matière', type: 'text', required: true, placeholder: 'Entrez le nom de la matière' },
-    { name: 'hourly_volume', label: 'Volume horaire', type: 'number', required: true, placeholder: 'Entrez le volume horaire' },
-    { name: 'session_duration', label: 'Durée de session (h)', type: 'number', required: true, placeholder: 'Entrez la durée de session' },
-    { name: 'start_at', label: 'Date de début', type: 'date', required: true, placeholder: 'Sélectionnez la date de début' },
-    { name: 'end_at', label: 'Date de fin', type: 'date', required: true, placeholder: 'Sélectionnez la date de fin' },
+    {
+      name: "name",
+      label: "Nom de la matière",
+      type: "text",
+      required: true,
+      placeholder: "Entrez le nom de la matière",
+      validation: (value: string) => (value.length < 3 ? "Le nom de la matière doit contenir au moins 3 caractères" : null),
+    },
+    {
+      name: "hourly_volume",
+      label: "Volume horaire",
+      type: "number",
+      required: true,
+      placeholder: "Entrez le volume horaire",
+      validation: (value: number) => (value <= 0 ? "Le volume horaire doit être supérieur à 0" : null),
+    },
+    {
+      name: "session_duration",
+      label: "Durée de session (h)",
+      type: "number",
+      required: true,
+      placeholder: "Entrez la durée de la session",
+    },
+    {
+      name: "start_at",
+      label: "Date de début",
+      type: "date",
+      required: true,
+      validation: (value, formData) => {
+        const endDate = formData ? formData["end_at"] : null;
+        if (endDate && new Date(value) >= new Date(endDate)) {
+          return "La date de début doit être inférieure à la date de fin.";
+        }
+        return null;
+      },
+    },
+    {
+      name: "end_at",
+      label: "Date de fin",
+      type: "date",
+      required: true,
+      validation: (value, formData) => {
+        const startDate = formData ? formData["start_at"] : null;
+        if (startDate && new Date(value) <= new Date(startDate)) {
+          return "La date de fin doit être supérieure à la date de début.";
+        }
+        return null;
+      },
+    },
+  ];
+
+  const sendCsvFields: FormField[] = [
+    {
+      name: "years_group_id",
+      label: "Promotion",
+      type: "select",
+      options: yearsGroupOptions,
+      required: true,
+      placeholder: "Sélectionnez une promotion",
+    },
+    {
+      name: "csv",
+      label: "Fichier CSV",
+      type: "file",
+      required: true,
+    },
   ];
 
   const assignCourseFields: FormField[] = [
     {
-      name: 'users_id',
-      label: 'Nom du professeur',
-      type: 'select',
+      name: "users_id",
+      label: "Nom du professeur",
+      type: "select",
       options: professorOptions,
       required: true,
-      placeholder: 'Sélectionnez un professeur',
+      placeholder: "Sélectionnez un professeur",
     },
     {
-      name: 'subjects_id',
-      label: 'Nom du cours',
-      type: 'select',
+      name: "subjects_id",
+      label: "Nom du cours",
+      type: "select",
       options: courseOptions,
       required: true,
-      placeholder: 'Sélectionnez un cours',
+      placeholder: "Sélectionnez un cours",
     },
     {
-      name: 'classes_id',
-      label: 'Nom de la classe',
-      type: 'select',
+      name: "classes_id",
+      label: "Nom de la classe",
+      type: "select",
       options: classOptions,
       required: true,
-      placeholder: 'Sélectionnez une classe',
+      placeholder: "Sélectionnez une classe",
     },
-    { name: 'url_online', 
-      label: 'Cours en ligne',
-      type: 'text', 
-      required: false,
-       placeholder: 'Entrez l\'URL du cours en ligne (optionnel)'
-      },
-  ];
-
-  const promotioCranCreateFields: FormField[] = [
-    { name: 'name', label: 'Nom de la promotion', type: 'text', required: true, placeholder: 'Entrez le nom de la promotion' },
   ];
 
   const tabs = [
     {
-      name: 'Créer un professeur',
+      name: "Créer un professeur",
       content: (
         <FormBuilder
+          title="Création d'un professeur"
+          description="Utilisez ce formulaire pour ajouter un nouveau professeur."
           fields={createProfessorFields}
           apiEndpoint={`${baseUrl}/users/invitation/send`}
-          buttonText="Envoyer l'invitation"
-          onSuccess={handleSuccess}
-          onError={handleError}
+          buttonText="Créer le professeur"
+          onSuccess={() => {
+            notifySuccess("Professeur créé avec succès !");
+            fetchProfessors();
+          }}
+          onError={() => notifyError("Erreur lors de la création du professeur.")}
         />
       ),
     },
     {
-      name: 'Créer une promotion',
+      name: "Créer une classe",
       content: (
         <FormBuilder
-          fields={promotioCranCreateFields}
-          apiEndpoint={`${baseUrl}/years_groups/create`}
-          buttonText="Créer une promotion"
-          onSuccess={handleSuccess}
-          onError={handleError}
-        />
-      ),
-    },
-    {
-      name: 'Créer une classe',
-      content: (
-        <FormBuilder
+          title="Création d'une classe"
+          description="Remplissez les informations pour créer une nouvelle classe."
           fields={createClassFields}
           apiEndpoint={`${baseUrl}/classes/create`}
-          buttonText="Créer une classe"
-          onSuccess={handleSuccess}
-          onError={handleError}
+          buttonText="Créer la classe"
+          onSuccess={() => {
+            notifySuccess("Classe créée avec succès !");
+            fetchClasses();
+          }}
+          onError={() => notifyError("Erreur lors de la création de la classe.")}
         />
       ),
     },
     {
-      name: 'Créer une matière',
+      name: "Créer une matière",
       content: (
         <FormBuilder
+          title="Création d'une matière"
+          description="Remplissez les informations pour créer une nouvelle matière."
           fields={createSubjectFields}
           apiEndpoint={`${baseUrl}/subjects`}
-          buttonText="Créer une matière"
-          onSuccess={handleSuccess}
-          onError={handleError}
+          buttonText="Créer la matière"
+          onSuccess={() => {
+            notifySuccess("Matière créée avec succès !");
+            fetchCourses();
+          }}
+          onError={() => notifyError("Erreur lors de la création de la matière.")}
         />
       ),
     },
     {
-      name: 'Attribuer un cours au prof',
+      name: "Importer un fichier CSV",
       content: (
         <FormBuilder
+          title="Importation via CSV"
+          description="Téléchargez un fichier CSV avec les données nécessaires."
+          fields={sendCsvFields}
+          apiEndpoint={`${baseUrl}/educational_courses/import`}
+          buttonText="Envoyer le fichier"
+          onSuccess={() => {
+            notifySuccess("Fichier CSV importé avec succès !");
+            fetchYearsGroups();
+          }}
+          onError={() => notifyError("Erreur lors de l'importation du fichier CSV.")}
+        />
+      ),
+    },
+    {
+      name: "Attribuer un cours",
+      content: (
+        <FormBuilder
+          title="Attribuer un cours"
+          description="Associez un professeur, un cours et une classe."
           fields={assignCourseFields}
           apiEndpoint={`${baseUrl}/assignments-subjects/`}
           buttonText="Attribuer"
-          onSuccess={handleSuccess}
-          onError={handleError}
-        />
-      ),
-    },
-    {
-      name: 'Envoyer un fichier CSV',
-      content: (
-        <FormBuilder
-          fields={sendCsvFields}
-          buttonText="Envoyer le fichier"
-          onSubmit={async (formData) => {
-            const yearsGroupId = formData.get('years_group_id') as string;
-            const csvFile = formData.get('csv') as File;
-            const formDataToSend = new FormData();
-            formDataToSend.append('file', csvFile); // Assurez-vous que le champ est nommé 'file'
-
-            try {
-              const response = await fetch(`${baseUrl}/educational_courses/import/${yearsGroupId}`, {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: formDataToSend,
-              });
-
-              if (response.ok) {
-                handleSuccess('Fichier CSV envoyé avec succès');
-              } else {
-                const error = await response.json();
-                handleError('Une erreur est survenue lors de l\'envoi du fichier CSV.');
-                console.error('Erreur lors de l\'envoi du fichier CSV:', error);
-              }
-            } catch (error) {
-              handleError('Impossible de se connecter au serveur.');
-              console.error('Erreur réseau:', error);
-            }
+          onSuccess={() => {
+            notifySuccess("Cours attribué avec succès !");
+            fetchCourses();
           }}
-          onError={handleError}
+          onError={() => notifyError("Erreur lors de l'attribution du cours.")}
         />
       ),
     },
   ];
 
+  // Render
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded-lg">
-        {progressMessage && <ProgressBar message={progressMessage} type={progressType} />}
         <TabBar position="left-68" tabs={tabs} />
         <div className="fixed bottom-4 right-4">
           <button
@@ -306,6 +368,7 @@ function AdminPage() {
           >
             <AiOutlineRobot size={24} />
           </button>
+          <ToastContainer />
         </div>
         {showChat && (
           <div className="fixed bottom-16 right-4 w-80 p-4 bg-blue-100 rounded-lg shadow-lg">
