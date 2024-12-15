@@ -352,19 +352,10 @@ function AdminPage() {
       <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded-lg">
         <TabBar position="left-68" tabs={tabs} />
         <div className="fixed bottom-4 right-4">
-          <button
-            className="p-4 bg-indigo-500 text-white rounded-full shadow-lg"
-            onClick={() => setShowChat(!showChat)}
-          >
-            <AiOutlineRobot size={24} />
-          </button>
+         
           <ToastContainer />
         </div>
-        {showChat && (
-          <div className="fixed bottom-16 right-4 w-80 p-4 bg-blue-100 rounded-lg shadow-lg">
-            {/* <ChatBubble text="Ceci est un message de l'IA." /> */}
-          </div>
-        )}
+       
       </div>
     </div>
   );

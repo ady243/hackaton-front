@@ -26,7 +26,15 @@ function TeacherCsv() {
       });
 
       if (response.ok) {
-        const blob = await response.blob();
+        const data = await response.json();
+        interface AvailabilityRow {
+          date: string;
+          morning: string;
+          afternoon: string;
+        }
+
+        const csvContent = data.map((row: AvailabilityRow) => `${row.date},${row.morning},${row.afternoon}`).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
