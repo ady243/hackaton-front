@@ -20,7 +20,6 @@ function AdminPage() {
   const [classOptions, setClassOptions] = useState([]);
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  // Fetch data functions
   const fetchYearsGroups = useCallback(async () => {
     try {
       const data = await apiService.fetchWithAuth(`${baseUrl}/years_groups`, {}, token);
@@ -106,6 +105,19 @@ function AdminPage() {
       validation: (value: string) => (!/\S+@\S+\.\S+/.test(value) ? "L'email est invalide" : null),
     },
   ];
+
+  const promotioCranCreateFields: FormField[] = [
+    {
+      name: "name",
+      label: "Nom de la promotion",
+      type: "text",
+      required: true,
+      placeholder: "Entrez le nom de la promotion",
+      validation: (value: string) =>
+        value.length < 3 ? "Le nom de la promotion doit contenir au moins 3 caractères." : null,
+    },
+  ];
+
 
   const createClassFields: FormField[] = [
     {
@@ -246,6 +258,25 @@ function AdminPage() {
             fetchProfessors();
           }}
           onError={() => notifyError("Erreur lors de la création du professeur.")}
+        />
+      ),
+    },
+    {
+      name: "Créer une promotion",
+      content: (
+        <FormBuilder
+          fields={promotioCranCreateFields}
+          apiEndpoint={`${baseUrl}/years_groups/create`}
+          buttonText="Créer une promotion"
+          onSuccess={
+            () => {
+              notifySuccess("Promotion créée avec succès !");
+              fetchYearsGroups();
+            }
+          }
+          onError={
+            () => notifyError("Erreur lors de la création de la promotion.")
+          }
         />
       ),
     },
