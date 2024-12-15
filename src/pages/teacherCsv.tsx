@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 
 function TeacherCsv() {
   const { currentUser } = useAuth();
-  const { user } = currentUser();
+  const { user, token } = currentUser();
   const [availabilityText, setAvailabilityText] = useState('');
   const [loading, setLoading] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -17,6 +17,7 @@ function TeacherCsv() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           download_csv: true,
@@ -57,6 +58,9 @@ function TeacherCsv() {
 
       const response = await fetch(`${baseUrl}/availabilities/import/${user?.id}`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -74,8 +78,8 @@ function TeacherCsv() {
 
   return (
     <div className="flex flex-col items-center p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Générer et Importer un planing</h1>
-      <p className="text-center">Utilisez l&apos;outil ci-dessous pour générer un planing de vos disponibilités et l&apos;importer dans notre système.</p>
+      <h1 className="text-2xl font-bold">Générer et Importer un planning</h1>
+      <p className="text-center">Utilisez l&apos;outil ci-dessous pour générer un fichier CSV de vos disponibilités et l&apos;importer dans notre système.</p>
       
       <div className="w-full max-w-lg">
         <textarea
@@ -90,7 +94,7 @@ function TeacherCsv() {
           className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
           disabled={loading}
         >
-          {loading ? <Loader /> : 'Télécharger le planing'}
+          {loading ? <Loader /> : 'Télécharger le planning'}
         </button>
       </div>
 
@@ -106,7 +110,7 @@ function TeacherCsv() {
           className="w-full bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
           disabled={loading}
         >
-          {loading ? <Loader /> : 'Importer le planing'}
+          {loading ? <Loader /> : 'Importer le planning'}
         </button>
       </div>
     </div>
