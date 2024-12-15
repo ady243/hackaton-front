@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { AiOutlineRobot } from "react-icons/ai";
-import ChatBubble from "@/components/ChatBubble";
+// import ChatBubble from "@/components/ChatBubble";
 import FormBuilder from "@/components/genericComponent/FormBuilder";
 import { FormField } from "@/components/genericComponent/FormBuilder";
 import TabBar from "@/components/genericComponent/TabBar";
@@ -362,7 +362,7 @@ function AdminPage() {
         </div>
         {showChat && (
           <div className="fixed bottom-16 right-4 w-80 p-4 bg-blue-100 rounded-lg shadow-lg">
-            <ChatBubble text="Ceci est un message de l'IA." />
+            {/* <ChatBubble text="Ceci est un message de l'IA." /> */}
           </div>
         )}
       </div>
