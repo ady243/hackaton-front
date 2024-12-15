@@ -3,6 +3,12 @@ import baseUrl from '@/config/baseUrl';
 import Loader from '@/components/Loader';
 import { useAuth } from '@/context/AuthContext';
 
+interface AvailabilityData {
+  date: string;
+  morning: string;
+  afternoon: string;
+}
+
 function TeacherCsv() {
   const { currentUser } = useAuth();
   const { user, token } = currentUser();
@@ -26,14 +32,8 @@ function TeacherCsv() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        interface AvailabilityRow {
-          date: string;
-          morning: string;
-          afternoon: string;
-        }
-
-        const csvContent = data.map((row: AvailabilityRow) => `${row.date},${row.morning},${row.afternoon}`).join('\n');
+        const data: AvailabilityData[] = await response.json();
+        const csvContent = data.map((row) => `${row.date},${row.morning},${row.afternoon}`).join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
