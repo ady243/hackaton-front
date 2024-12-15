@@ -134,43 +134,6 @@ function AdminPage() {
     },
   ];
 
-  // const createSubjectFields: FormField[] = [
-  //   {
-  //     name: "name",
-  //     label: "Nom de la matière",
-  //     type: "text",
-  //     required: true,
-  //     placeholder: "Entrez le nom de la matière",
-  //     validation: (value: string) => (value.length < 3 ? "Le nom de la matière doit contenir au moins 3 caractères" : null),
-  //   },
-  //   {
-  //     name: "hourly_volume",
-  //     label: "Volume horaire",
-  //     type: "number",
-  //     required: true,
-  //     placeholder: "Entrez le volume horaire",
-  //     validation: (value: number) => (value <= 0 ? "Le volume horaire doit être supérieur à 0" : null),
-  //   },
-  //   {
-  //     name: "session_duration",
-  //     label: "Durée de session (h)",
-  //     type: "number",
-  //     required: true,
-  //     placeholder: "Entrez la durée de la session",
-  //   },
-  //   {
-  //     name: "start_at",
-  //     label: "Date de début",
-  //     type: "date",
-  //     required: true,
-  //   },
-  //   {
-  //     name: "end_at",
-  //     label: "Date de fin",
-  //     type: "date",
-  //     required: true,
-  //   },
-  // ];
 
   const createSubjectFields: FormField[] = [
     {
@@ -321,22 +284,50 @@ function AdminPage() {
       ),
     },
     {
-      name: "Importer un fichier CSV",
+      name: "Importer un calendrier pédagogique",
       content: (
         <FormBuilder
           title="Importation via CSV"
-          description="Téléchargez un fichier CSV avec les données nécessaires."
+          description="Téléchargez le calendrier pédagogiques en csv, les champs qui sont requis day, day_type exemple : 2021-09-01 examen, 2021-09-02 cours"
           fields={sendCsvFields}
-          apiEndpoint={`${baseUrl}/educational_courses/import`}
-          buttonText="Envoyer le fichier"
-          onSuccess={() => {
-            notifySuccess("Fichier CSV importé avec succès !");
-            fetchYearsGroups();
+          onSubmit={async (formData) => {
+            const yearsGroupId = formData.get("years_group_id") as string; 
+            const csvFile = formData.get("csv") as File; 
+    
+            if (!yearsGroupId) {
+              notifyError("Veuillez sélectionner une promotion.");
+              return;
+            }
+    
+            if (!csvFile) {
+              notifyError("Veuillez importer un fichier CSV.");
+              return;
+            }
+    
+            try {
+              const formDataToSend = new FormData();
+              formDataToSend.append("file", csvFile);
+    
+              await apiService.postFormDataWithAuth(
+                `${baseUrl}/educational_courses/import/${yearsGroupId}`,
+                formDataToSend,
+                token
+              );
+    
+              notifySuccess("Fichier CSV importé avec succès !");
+              fetchYearsGroups(); 
+            } catch (error) {
+              console.error("Erreur lors de l'importation du fichier CSV:", error);
+              notifyError("Erreur lors de l'importation du fichier CSV.");
+            }
           }}
+          buttonText="Envoyer le fichier"
           onError={() => notifyError("Erreur lors de l'importation du fichier CSV.")}
         />
       ),
     },
+    
+    
     {
       name: "Attribuer un cours",
       content: (
@@ -356,7 +347,6 @@ function AdminPage() {
     },
   ];
 
-  // Render
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-4xl p-8 space-y-6 bg-white rounded-lg">

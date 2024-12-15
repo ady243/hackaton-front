@@ -38,6 +38,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
   const [errors, setErrors] = useState<Record<string, string | null>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { token } = useAuth();
+  const [fileInputKey, setFileInputKey] = useState(0); 
 
   useEffect(() => {
     const initialFormData: Record<string, any> = {};
@@ -79,11 +80,15 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
+  const resetFileInput = () => {
+    setFileInputKey((prevKey) => prevKey + 1); 
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateAllFields()) {
-      return; 
+      return;
     }
 
     setIsSubmitting(true);
@@ -94,7 +99,9 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
       const formDataToSend = new FormData();
       Object.keys(formData).forEach((key) => {
         const value = formData[key];
-        formDataToSend.append(key, value);
+        if (value instanceof File || value) {
+          formDataToSend.append(key, value);
+        }
       });
       body = formDataToSend;
     } else {
@@ -115,6 +122,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
 
         if (response.ok) {
           if (onSuccess) onSuccess();
+          resetFileInput(); 
         } else {
           if (onError) onError();
         }
@@ -157,6 +165,19 @@ const FormBuilder: React.FC<FormBuilderProps> = ({
                   </option>
                 ))}
               </select>
+            ) : field.type === "file" ? (
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type}
+                onChange={handleChange}
+                key={field.name + fileInputKey} 
+                className={`border rounded-md p-2 w-full ${
+                  errors[field.name] ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder={field.placeholder}
+                disabled={field.disabled}
+              />
             ) : (
               <input
                 id={field.name}
