@@ -7,13 +7,9 @@ import apiService from "@/lib/apiService";
 import baseUrl from "@/config/baseUrl";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AvailabilityItem } from "@/interfaces/interaces";
 
-interface AvailabilityItem {
-  date: string;
-  startAt: string;
-  endAt: string;
-  isSelected: boolean;
-}
+
 
 const timeRanges = {
   Matin: { start: "08:00", end: "13:00" },
@@ -152,7 +148,7 @@ const ProfessorPageAdmin = () => {
     <div className="flex flex-col items-center p-6 space-y-6">
       <h1 className="text-2xl font-bold">Saisie des disponibilités</h1>
 
-      <div className="bg-white p-6 rounded-md shadow-md w-full max-w-lg">
+      <div className="bg-white p-6 rounded-md w-full max-w-lg">
         <h2 className="text-xl font-semibold mb-4">Ajouter Disponibilités</h2>
 
         <div className="mb-4">
@@ -233,7 +229,7 @@ const ProfessorPageAdmin = () => {
         </button>
       </div>
 
-      <div className="bg-white p-6 rounded-md shadow-md w-full max-w-lg">
+      <div className="bg-white p-6 rounded-md w-full max-w-lg">
         <h2 className="text-xl font-semibold mb-4">Liste des disponibilités</h2>
 
         {addedItems.length === 0 ? (

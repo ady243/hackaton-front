@@ -195,3 +195,25 @@ export interface User {
       last_name: string;
     };
   }
+
+
+  interface CalendarEvent {
+    id: string;
+    title: string;
+    start: string;
+    end: string;
+    color?: string;
+    textColor?: string;
+  }
+
+  interface ClassItem {
+    id: string;
+    name: string;
+  }
+  
+  interface AvailabilityItem {
+    date: string;
+    startAt: string;
+    endAt: string;
+    isSelected: boolean;
+  }
