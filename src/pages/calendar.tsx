@@ -10,24 +10,24 @@ import tippy from 'tippy.js';
 import '../pages/css/calendar.css';
 import baseUrl from '@/config/baseUrl';
 import { CalendarEvent, ClassItem } from '@/interfaces/interaces';
-
+import { Spinner } from '@/components/ui';
 
 
 export default function Calendar() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchClasses = async () => {
+      setLoading(true);
       try {
         const response = await fetch(`${baseUrl}/classes`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
-        }
-        );
+        });
         if (response.ok) {
           const data: ClassItem[] = await response.json();
           setClasses(data);
@@ -36,6 +36,8 @@ export default function Calendar() {
         }
       } catch (error) {
         console.error('Error fetching classes:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -43,23 +45,20 @@ export default function Calendar() {
   }, []);
 
   const handleLoadCalendar = async () => {
-    console.log('Selected class:', selectedClass);
     if (!selectedClass) {
       alert('Veuillez sélectionner une classe.');
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/sessions-subjects/class/${selectedClass}` , {
+      const response = await fetch(`${baseUrl}/sessions-subjects/class/${selectedClass}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-      }
-      );
-      console.log(response);
+      });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         interface EventData {
           id: number;
           assignment_info: {
@@ -85,6 +84,8 @@ export default function Calendar() {
       }
     } catch (error) {
       console.error('Error loading calendar events:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,40 +112,44 @@ export default function Calendar() {
             Charger le calendrier
           </button>
         </div>
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }}
-          locale={frLocale}
-          selectable={true}
-          selectMirror={true}
-          allDaySlot={false}
-          dayMaxEvents={false}
-          events={events}
-          select={(info) => {
-            console.log('Selected:', info.allDay, info.startStr, info.endStr);
-          }}
-          eventClick={(info) => {
-            alert('Event: ' + info.event.title);
-            info.el.style.borderColor = 'red';
-          }}
-          eventDidMount={(info) => {
-            tippy(info.el, {
-              content: `
-                <strong>${info.event.title}</strong><br>
-                Début: ${info.event.start ? info.event.start.toLocaleString() : 'N/A'}<br>
-                Fin: ${info.event.end ? info.event.end.toLocaleString() : 'N/A'}
-              `,
-              allowHTML: true,
-              placement: 'top',
-              theme: 'light-border',
-            });
-          }}
-        />
+        {loading ? (
+          <Spinner size="48px" />
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            }}
+            locale={frLocale}
+            selectable={true}
+            selectMirror={true}
+            allDaySlot={false}
+            dayMaxEvents={false}
+            events={events}
+            select={(info) => {
+              console.log('Selected:', info.allDay, info.startStr, info.endStr);
+            }}
+            eventClick={(info) => {
+              alert('Event: ' + info.event.title);
+              info.el.style.borderColor = 'red';
+            }}
+            eventDidMount={(info) => {
+              tippy(info.el, {
+                content: `
+                  <strong>${info.event.title}</strong><br>
+                  Début: ${info.event.start ? info.event.start.toLocaleString() : 'N/A'}<br>
+                  Fin: ${info.event.end ? info.event.end.toLocaleString() : 'N/A'}
+                `,
+                allowHTML: true,
+                placement: 'top',
+                theme: 'light-border',
+              });
+            }}
+          />
+        )}
       </div>
     </div>
   );

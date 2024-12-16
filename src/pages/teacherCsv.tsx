@@ -32,17 +32,21 @@ function TeacherCsv() {
       });
 
       if (response.ok) {
-        const data: AvailabilityData[] = await response.json();
-        const csvContent = data.map((row) => `${row.date},${row.morning},${row.afternoon}`).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'professor_availability.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setCsvFile(new File([blob], 'professor_availability.csv', { type: 'text/csv' }));
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          const csvContent = data.map((row: AvailabilityData) => `${row.date},${row.morning},${row.afternoon}`).join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'professor_availability.csv';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setCsvFile(new File([blob], 'professor_availability.csv', { type: 'text/csv' }));
+        } else {
+          console.error('Unexpected response format:', data);
+        }
       } else {
         console.error('Failed to download CSV');
       }
